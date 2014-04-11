@@ -10,7 +10,7 @@
         fireRate = 90;
         nextFire = 0;
 
-        missleRate = 500;
+        missleRate = 550;
         nextMissle = 0;
 
         constructor(game: Phaser.Game, x: number, y: number)
@@ -86,7 +86,7 @@
 
                 bullet.reset(x, this.y - 8);
 
-                this.game.physics.arcade.moveToXY(bullet, x, 0, 550);
+                this.game.physics.arcade.moveToXY(bullet, x, 0, 650);
             }
 
             if (this.game.time.now > this.nextMissle && this.missles.countDead() > 0) {
@@ -94,7 +94,7 @@
                 var missle = this.missles.getFirstDead();
                 missle.reset(this.x + (this.width / 2) - 13, this.y - 4);
 
-                this.game.physics.arcade.moveToXY(missle, this.x + (this.width / 2) - 13, 0, 300);
+                this.game.physics.arcade.moveToXY(missle, this.x + (this.width / 2) - 13, 0, 400);
             }
         }
     }

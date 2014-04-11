@@ -111,7 +111,7 @@ var Spaders;
             _super.call(this, game, x, y, 'ship', 0);
             this.fireRate = 90;
             this.nextFire = 0;
-            this.missleRate = 500;
+            this.missleRate = 550;
             this.nextMissle = 0;
 
             game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -176,11 +176,11 @@ var Spaders;
                 this.nextFire = this.game.time.now + this.fireRate;
                 var bullet = this.bullets.getFirstDead();
 
-                var x = this.x + (this.width / 2) - (bullet.width / 2);
+                var x = this.x + (this.width / 2) - (14 / 2);
 
-                bullet.reset(x, this.y - 4);
+                bullet.reset(x, this.y - 8);
 
-                this.game.physics.arcade.moveToXY(bullet, x, 0, 550);
+                this.game.physics.arcade.moveToXY(bullet, x, 0, 650);
             }
 
             if (this.game.time.now > this.nextMissle && this.missles.countDead() > 0) {
@@ -188,7 +188,7 @@ var Spaders;
                 var missle = this.missles.getFirstDead();
                 missle.reset(this.x + (this.width / 2) - 13, this.y - 4);
 
-                this.game.physics.arcade.moveToXY(missle, this.x + (this.width / 2) - 13, 0, 300);
+                this.game.physics.arcade.moveToXY(missle, this.x + (this.width / 2) - 13, 0, 400);
             }
         };
         return Player;
