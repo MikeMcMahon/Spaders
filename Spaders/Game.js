@@ -215,7 +215,7 @@ var Spaders;
             this.load.image('ship', 'assets/ship.png');
             this.load.image('titlepage', 'assets/spaders.png');
             this.load.image('p_star', 'assets/star_particle.jpg');
-            this.load.image('p_ship_thrust', 'assets/ship_trail_particle.png');
+            this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png', 2, 2);
             this.load.image('player_shot_1', 'assets/ship_bullet_1.png');
             this.load.image('missle_shot', 'assets/missle.png');
         };
@@ -232,4 +232,4 @@ var Spaders;
     })(Phaser.State);
     Spaders.Preloader = Preloader;
 })(Spaders || (Spaders = {}));
-//# sourceMappingURL=Game.js.map
+//# sourceMappingURL=game.js.map
