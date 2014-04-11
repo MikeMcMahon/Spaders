@@ -41,7 +41,7 @@ var Spaders;
     var Game = (function (_super) {
         __extends(Game, _super);
         function Game() {
-            _super.call(this, 320, 320, Phaser.CANVAS, 'content', null);
+            _super.call(this, 640, 700, Phaser.CANVAS, 'content', null);
 
             this.state.add('Boot', Spaders.Boot, false);
             this.state.add('Preloader', Spaders.Preloader, false);
@@ -117,23 +117,7 @@ var Spaders;
             game.physics.enable(this, Phaser.Physics.ARCADE);
             game.add.existing(this);
 
-            this.lThrust = new Phaser.Particles.Arcade.Emitter(game, 2, this.height);
-            this.lThrust.width = 4;
-            this.lThrust.makeParticles('p_ship_thrust', [0, 1, 2, 3], 50);
-            this.lThrust.minParticleScale = .7;
-            this.lThrust.maxParticleScale = 1;
-            this.lThrust.setXSpeed(-5, 5);
-            this.lThrust.setYSpeed(45, 50);
-            this.lThrust.start(false, 500, 150);
-
-            this.rThrust = new Phaser.Particles.Arcade.Emitter(game, 2, this.height);
-            this.rThrust.width = 4;
-            this.rThrust.makeParticles('p_ship_thrust', [0, 1, 2, 3], 50);
-            this.rThrust.minParticleScale = .7;
-            this.rThrust.maxParticleScale = 1;
-            this.rThrust.setXSpeed(-5, 5);
-            this.rThrust.setYSpeed(45, 50);
-            this.rThrust.start(false, 500, 150);
+            this.configure_thrusters();
 
             this.bullets = new Phaser.Group(this.game, this, 'gun');
             this.bullets.enableBody = true;
@@ -152,10 +136,32 @@ var Spaders;
             game.add.existing(this.missles);
             game.add.existing(this.bullets);
         }
+        Player.prototype.configure_thrusters = function () {
+            this.lThrust = new Phaser.Particles.Arcade.Emitter(this.game, 2, this.height);
+            this.lThrust.width = 4;
+            this.lThrust.makeParticles('p_ship_thrust', [0, 1, 2, 3], 50);
+            this.lThrust.minParticleScale = .7;
+            this.lThrust.maxParticleScale = 1;
+            this.lThrust.setXSpeed(-2, 2);
+            this.lThrust.setYSpeed(45, 50);
+            this.lThrust.start(false, 500, 150);
+            this.lThrust.gravity = 1000;
+
+            this.rThrust = new Phaser.Particles.Arcade.Emitter(this.game, 2, this.height);
+            this.rThrust.width = 4;
+            this.rThrust.makeParticles('p_ship_thrust', [0, 1, 2, 3], 50);
+            this.rThrust.minParticleScale = .7;
+            this.rThrust.maxParticleScale = 1;
+            this.rThrust.setXSpeed(-2, 2);
+            this.rThrust.setYSpeed(45, 50);
+            this.rThrust.start(false, 500, 150);
+            this.rThrust.gravity = 1000;
+        };
+
         Player.prototype.update = function () {
-            this.lThrust.x = this.x + 3;
+            this.lThrust.x = this.x + 4;
             this.lThrust.y = this.y + this.height;
-            this.rThrust.x = this.x + 14;
+            this.rThrust.x = this.x + 30;
             this.rThrust.y = this.y + this.height;
 
             this.game.physics.arcade.moveToPointer(this, 60, this.game.input.activePointer, 500);
@@ -169,9 +175,12 @@ var Spaders;
             if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0) {
                 this.nextFire = this.game.time.now + this.fireRate;
                 var bullet = this.bullets.getFirstDead();
-                bullet.reset(this.x + (this.width / 2) - 3, this.y - 4);
 
-                this.game.physics.arcade.moveToXY(bullet, this.x + (this.width / 2), 0, 450);
+                var x = this.x + (this.width / 2) - (bullet.width / 2);
+
+                bullet.reset(x, this.y - 4);
+
+                this.game.physics.arcade.moveToXY(bullet, x, 0, 550);
             }
 
             if (this.game.time.now > this.nextMissle && this.missles.countDead() > 0) {
@@ -218,4 +227,4 @@ var Spaders;
     })(Phaser.State);
     Spaders.Preloader = Preloader;
 })(Spaders || (Spaders = {}));
-//# sourceMappingURL=game.js.map
+//# sourceMappingURL=Game.js.map
