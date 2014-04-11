@@ -5,7 +5,7 @@
         // Load our assets...
         preload()
         {
-            this.load.image('loadingBar', 'assets/loading-bar.png');
+            this.load.spritesheet('loadingBar', 'assets/loading-bar.png', 360, 90, 4);
         }
 
         create()

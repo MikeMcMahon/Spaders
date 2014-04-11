@@ -6,9 +6,13 @@
 
         preload()
         {
-            this.preloadBar = this.add.sprite(this.game.world.centerX - (60), this.game.world.centerY-15, 'loadingBar');
-            this.load.setPreloadSprite(this.preloadBar);
+            this.preloadBar = this.add.sprite(0, 0, 'loadingBar', 4);
+            this.preloadBar.x = this.game.world.centerX - (this.preloadBar.width / 2);
+            this.preloadBar.y = this.game.world.centerY - (this.preloadBar.height / 2);
 
+            this.load.setPreloadSprite(this.preloadBar);
+            var loading = this.preloadBar.animations.add('loading');
+            loading.play(10, true);
             // load game assets
             this.load.image('ship', 'assets/ship.png');
             this.load.image('titlepage', 'assets/spaders.png');
