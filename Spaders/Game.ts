@@ -4,7 +4,7 @@
     {
         constructor()
         {
-            super(640, 700, Phaser.CANVAS, 'content', null);
+            super(640, 640, Phaser.CANVAS, 'content', null);
 
             this.state.add('Boot', Boot, false);
             this.state.add('Preloader', Preloader, false);

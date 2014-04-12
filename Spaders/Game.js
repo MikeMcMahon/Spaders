@@ -41,7 +41,7 @@ var Spaders;
     var Game = (function (_super) {
         __extends(Game, _super);
         function Game() {
-            _super.call(this, 640, 700, Phaser.CANVAS, 'content', null);
+            _super.call(this, 640, 640, Phaser.CANVAS, 'content', null);
 
             this.state.add('Boot', Spaders.Boot, false);
             this.state.add('Preloader', Spaders.Preloader, false);
@@ -63,10 +63,19 @@ var Spaders;
         }
         Level1.prototype.create = function () {
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
+            this.enemy = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'enemy_1');
+            this.enemy.name = "e1";
+            this.enemy.anchor.setTo(0.5, 0.5);
+
             this.player = new Spaders.Player(this.game, 60, 60);
         };
 
+        Level1.prototype.update = function () {
+            this.enemy.rotation = this.game.physics.arcade.angleToPointer(this.enemy);
+        };
+
         Level1.prototype.render = function () {
+            this.game.debug.spriteInfo(this.enemy, 10, 80);
             this.game.debug.spriteInfo(this.player, 10, 10);
         };
         return Level1;
@@ -186,9 +195,32 @@ var Spaders;
             if (this.game.time.now > this.nextMissle && this.missles.countDead() > 0) {
                 this.nextMissle = this.game.time.now + this.missleRate;
                 var missle = this.missles.getFirstDead();
-                missle.reset(this.x + (this.width / 2) - 13, this.y - 4);
+                missle.reset(this.x + (this.width / 2) - 20, this.y - 8);
+                missle.rotation = 0;
 
-                this.game.physics.arcade.moveToXY(missle, this.x + (this.width / 2) - 13, 0, 400);
+                this.game.physics.enable(missle, Phaser.Physics.ARCADE);
+                missle.body.allowRotation = false;
+                missle.anchor.setTo(0.5, 0.5);
+
+                var children = this.game.world.children;
+                for (var i = 0; i < children.length; i++) {
+                    if (children[i] instanceof Phaser.Sprite) {
+                        if (children[i].name === "e1") {
+                            missle.rotation = this.game.physics.arcade.accelerateToObject(missle, children[i], 400);
+                            break;
+                        }
+                    }
+                }
+                //this.game.physics.arcade.moveToXY(missle, this.x + (this.width / 2) - 13, 0, 400);
+            }
+        };
+
+        Player.prototype.findFirstAlive = function (o, m) {
+            if (o.name === "e1") {
+                alert(o);
+                alert(m);
+
+                this.game.physics.arcade.moveToObject(m, o, 400, 2000);
             }
         };
         return Player;
@@ -213,6 +245,7 @@ var Spaders;
 
             // load game assets
             this.load.image('ship', 'assets/ship.png');
+            this.load.image('enemy_1', 'assets/enemy_1.png');
             this.load.image('titlepage', 'assets/spaders.png');
             this.load.image('p_star', 'assets/star_particle.jpg');
             this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png', 2, 2);

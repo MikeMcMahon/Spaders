@@ -16,6 +16,7 @@
 
             // load game assets
             this.load.image('ship', 'assets/ship.png');
+            this.load.image('enemy_1', 'assets/enemy_1.png');
             this.load.image('titlepage', 'assets/spaders.png');
             this.load.image('p_star', 'assets/star_particle.jpg');
             this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png',2,2);
