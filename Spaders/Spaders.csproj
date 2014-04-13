@@ -37,6 +37,7 @@
     <TypeScriptCompile Include="Game.ts" />
     <TypeScriptCompile Include="Level1.ts" />
     <TypeScriptCompile Include="MainMenu.ts" />
+    <TypeScriptCompile Include="Missle.ts" />
     <TypeScriptCompile Include="phaser.d.ts" />
     <TypeScriptCompile Include="Player.ts" />
     <TypeScriptCompile Include="Preloader.ts" />
