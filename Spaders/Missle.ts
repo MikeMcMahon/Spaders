@@ -3,7 +3,6 @@
         curTracking: Phaser.Sprite;
 
         update() {
-
         }
 
         fire(): void {

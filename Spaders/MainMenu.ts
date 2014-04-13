@@ -7,7 +7,8 @@
 
         create()
         {
-            this.background = this.add.sprite(0, 0, 'titlepage');
+            this.background = this.add.sprite(this.world.centerX, this.world.centerY, 'titlepage');
+            this.background.anchor.setTo(0.5, 0.5);
             this.background.alpha = 0;
 
             this.add.tween(this.background).to({ alpha: 1 }, 2000, Phaser.Easing.Bounce.InOut, true);

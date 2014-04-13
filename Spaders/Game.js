@@ -65,17 +65,26 @@ var Spaders;
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
             this.enemy = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'enemy_1');
             this.enemy.name = "e1";
+            this.enemy.angle = 90;
             this.enemy.anchor.setTo(0.5, 0.5);
             this.game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
-            this.enemy.body.bounce.set(1);
-            this.enemy.body.collideWorldBounds = true;
+            this.enemy.body.immovable = true;
+            this.enemy.body.allowRotation = false;
 
             this.player = new Spaders.Player(this.game, 60, 60);
         };
 
         Level1.prototype.update = function () {
-            this.game.physics.arcade.collide(this.enemy, this.player.missles);
-            this.enemy.rotation = this.game.physics.arcade.angleBetween(this.enemy, this.player);
+            this.game.physics.arcade.collide(this.enemy, this.player.missles, this.missleCollides);
+            this.game.physics.arcade.collide(this.enemy, this.player.bullets, this.shotCollides);
+        };
+        Level1.prototype.missleCollides = function (obj1, obj2) {
+            obj2.alive = false;
+            obj2.exists = false;
+        };
+        Level1.prototype.shotCollides = function (obj1, obj2) {
+            obj2.alive = false;
+            obj2.exists = false;
         };
 
         Level1.prototype.render = function () {
@@ -96,7 +105,8 @@ var Spaders;
         }
         //logo: Phaser.Sprite;
         MainMenu.prototype.create = function () {
-            this.background = this.add.sprite(0, 0, 'titlepage');
+            this.background = this.add.sprite(this.world.centerX, this.world.centerY, 'titlepage');
+            this.background.anchor.setTo(0.5, 0.5);
             this.background.alpha = 0;
 
             this.add.tween(this.background).to({ alpha: 1 }, 2000, Phaser.Easing.Bounce.InOut, true);
