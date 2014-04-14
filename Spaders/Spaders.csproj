@@ -35,6 +35,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="Boot.ts" />
+    <TypeScriptCompile Include="Enemy.ts" />
     <TypeScriptCompile Include="Game.ts" />
     <TypeScriptCompile Include="Level1.ts" />
     <TypeScriptCompile Include="MainMenu.ts" />
@@ -44,6 +45,7 @@
     <TypeScriptCompile Include="Preloader.ts" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="maps\enemies.js" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -76,6 +78,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
+      <UserProperties assets_2enemies_1json__JSONSchema="" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -84,6 +87,8 @@
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>none</TypeScriptModuleKind>
     <TypeScriptOutFile>game.js</TypeScriptOutFile>
+    <DefineConstants>
+    </DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptTarget>ES5</TypeScriptTarget>

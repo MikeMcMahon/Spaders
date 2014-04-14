@@ -38,6 +38,30 @@ var Spaders;
 })(Spaders || (Spaders = {}));
 var Spaders;
 (function (Spaders) {
+    var Enemy = (function (_super) {
+        __extends(Enemy, _super);
+        function Enemy(id, game, x, y, key, map) {
+            _super.call(this, game, x, y, key);
+            this.name = map["name"] + id;
+            this.maxHealth = map["health"];
+            this.health = this.maxHealth;
+
+            this.anchor.setTo(0.5, 0.5);
+            this.angle = 90;
+            this.events.onRevived.add(this.restore, this);
+        }
+        Enemy.prototype.restore = function () {
+            this.health = this.maxHealth;
+        };
+
+        Enemy.prototype.update = function () {
+        };
+        return Enemy;
+    })(Phaser.Sprite);
+    Spaders.Enemy = Enemy;
+})(Spaders || (Spaders = {}));
+var Spaders;
+(function (Spaders) {
     var Game = (function (_super) {
         __extends(Game, _super);
         function Game() {
@@ -62,41 +86,48 @@ var Spaders;
             _super.apply(this, arguments);
         }
         Level1.prototype.create = function () {
-            this.debug = true;
+            this.debug = false;
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
-            this.enemy = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'enemy_1');
-            this.enemy.name = "e1";
-            this.enemy.angle = 90;
-            this.enemy.anchor.setTo(0.5, 0.5);
-            this.game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
 
-            this.enemy.body.immovable = true;
-            this.enemy.body.allowRotation = false;
+            this.enemies = this.game.add.group();
+            this.enemies.name = 'enemies';
+            this.enemies.enableBody = true;
+            this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
+            var enemyMap = this.cache.getJSON('enemy_map');
+            for (var i = 0; i < 10; i++) {
+                this.cache.getJSON('enemy_map');
+                this.enemies.add(new Spaders.Enemy(i, this.game, Math.random() * this.game.world.width, Math.random() * this.game.world.height, 'enemy_1', enemyMap['flyer']));
+            }
+            this.enemies.enableBodyDebug = true;
+            this.enemies.setAll('alive', true);
+            this.enemies.setAll('body.immovable', true);
 
             this.player = new Spaders.Player(this.game, 60, 60);
             this.player.missles.enableBodyDebug = true;
         };
 
         Level1.prototype.update = function () {
-            this.game.physics.arcade.collide(this.enemy, this.player.missles, this.missleCollides);
-            this.game.physics.arcade.collide(this.enemy, this.player.bullets, this.shotCollides);
+            var dead = this.enemies.getFirstDead();
+            if (dead !== null) {
+                dead.reset(Math.random() * this.game.world.width, Math.random() * this.game.world.height);
+                dead.revive();
+            }
+            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.missleCollides);
+            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.shotCollides);
         };
+
         Level1.prototype.missleCollides = function (obj1, obj2) {
             obj2.explode();
+            obj1.damage(25);
         };
         Level1.prototype.shotCollides = function (obj1, obj2) {
-            obj2.alive = false;
-            obj2.exists = false;
+            obj2.kill();
+            obj1.damage(10);
         };
 
         Level1.prototype.render = function () {
             if (this.debug == true) {
-                if (this.player.missles.getFirstAlive() !== null)
-                    this.game.debug.body(this.player.missles.getFirstAlive());
-
-                this.game.debug.body(this.enemy);
-                this.game.debug.spriteInfo(this.enemy, 10, 80);
                 this.game.debug.spriteInfo(this.player, 10, 10);
             }
         };
@@ -147,10 +178,11 @@ var Spaders;
             this.game.physics.enable(this, Phaser.Physics.ARCADE);
 
             this.anchor.setTo(0.5, 0.5);
-
-            //(<Phaser.Physics.Arcade.Body>this.body).setSize(1, 1, 0, 0);
             this.body.allowRotation = false;
         }
+        Missle.prototype.update = function () {
+        };
+
         Missle.prototype.explode = function () {
             // create an explosion in the current location
             var explosion = this.game.add.sprite(this.x, this.y, 'explosion_1');
@@ -162,16 +194,19 @@ var Spaders;
         };
 
         Missle.prototype.fire = function () {
-            this.rotation = 0;
-
             var children = this.game.world.children;
             var found = false;
             for (var i = 0; i < children.length; i++) {
-                if (children[i] instanceof Phaser.Sprite) {
-                    if (children[i].name === "e1") {
+                if (children[i] instanceof Phaser.Group) {
+                    if (children[i].name === "enemies") {
+                        var first = children[i].getFirstAlive();
+
+                        if (first === null)
+                            break;
+
                         found = true;
-                        this.rotation = this.game.physics.arcade.accelerateToObject(this, children[i], 300, 800, 800);
-                        this.curTracking = children[i];
+                        this.rotation = this.game.physics.arcade.accelerateToObject(this, first, 300, 800, 800);
+                        this.curTracking = first;
                         break;
                     }
                 }
@@ -179,6 +214,7 @@ var Spaders;
 
             if (!found) {
                 this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
+                this.angle = -90;
             }
         };
         return Missle;
@@ -305,6 +341,8 @@ var Spaders;
             this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png', 2, 2);
             this.load.image('player_shot_1', 'assets/ship_bullet_1.png');
             this.load.image('missle_shot', 'assets/missle.png');
+            this.load.json('enemy_map', 'maps/enemies.js');
+            this.load.json('projectiles', 'maps/projectiles.js');
         };
 
         Preloader.prototype.create = function () {

@@ -1,51 +1,67 @@
-﻿module Spaders
-{
-    export class Level1 extends Phaser.State
-    {
+﻿module Spaders {
+    export class Level1 extends Phaser.State {
         player: Spaders.Player;
-        enemy: Phaser.Sprite;
         debug: boolean;
+        enemies: Phaser.Group;
 
-        create()
-        {
-            this.debug = true;
+        create() {
+            this.debug = false;
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
-            this.enemy = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'enemy_1');
-            this.enemy.name = "e1";
-            this.enemy.angle = 90;
-            this.enemy.anchor.setTo(0.5, 0.5);
-            this.game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
 
-            this.enemy.body.immovable = true;
-            this.enemy.body.allowRotation = false;
+            this.enemies = this.game.add.group();
+            this.enemies.name = 'enemies';
+            this.enemies.enableBody = true;
+            this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
+            var enemyMap = this.cache.getJSON('enemy_map');
+            for (var i = 0; i < 10; i++) {
+                this.cache.getJSON('enemy_map');
+                this.enemies.add(
+                    new Enemy(
+                        i,
+                        this.game,
+                        Math.random() * this.game.world.width,
+                        Math.random() * this.game.world.height,
+                        'enemy_1',
+                        enemyMap['flyer']
+                        )
+                    );
+            }
+            this.enemies.enableBodyDebug = true;
+            this.enemies.setAll('alive', true);
+            this.enemies.setAll('body.immovable', true);
 
             this.player = new Spaders.Player(this.game, 60, 60);
             this.player.missles.enableBodyDebug = true;
         }
 
+
         update() {
-            this.game.physics.arcade.collide(this.enemy, this.player.missles, this.missleCollides);
-            this.game.physics.arcade.collide(this.enemy, this.player.bullets, this.shotCollides);
+            var dead = <Enemy>this.enemies.getFirstDead();
+            if (dead !== null) {
+                dead.reset(
+                    Math.random() * this.game.world.width,
+                    Math.random() * this.game.world.height
+                    );
+                dead.revive();
+            }
+            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.missleCollides);
+            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.shotCollides);
         }
-        missleCollides(obj1, obj2: Missle): void {
+
+        missleCollides(obj1: Enemy, obj2: Missle): void {
             obj2.explode();
+            obj1.damage(25);
         }
-        shotCollides(obj1, obj2: Phaser.Sprite): void {
-            obj2.alive = false;
-            obj2.exists = false;
+        shotCollides(obj1: Enemy, obj2: Phaser.Sprite): void {
+            obj2.kill();
+            obj1.damage(10);
         }
 
-        render()
-        {
+        render() {
             if (this.debug == true) {
-                if (this.player.missles.getFirstAlive() !== null)
-                    this.game.debug.body(this.player.missles.getFirstAlive());
-
-                this.game.debug.body(this.enemy);
-                this.game.debug.spriteInfo(this.enemy, 10, 80);
                 this.game.debug.spriteInfo(this.player, 10, 10);
             }
-        }   
+        }
     }
-} 
+}
