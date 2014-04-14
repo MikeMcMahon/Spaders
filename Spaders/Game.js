@@ -62,16 +62,20 @@ var Spaders;
             _super.apply(this, arguments);
         }
         Level1.prototype.create = function () {
+            this.debug = true;
+
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
             this.enemy = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'enemy_1');
             this.enemy.name = "e1";
             this.enemy.angle = 90;
             this.enemy.anchor.setTo(0.5, 0.5);
             this.game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
+
             this.enemy.body.immovable = true;
             this.enemy.body.allowRotation = false;
 
             this.player = new Spaders.Player(this.game, 60, 60);
+            this.player.missles.enableBodyDebug = true;
         };
 
         Level1.prototype.update = function () {
@@ -79,8 +83,7 @@ var Spaders;
             this.game.physics.arcade.collide(this.enemy, this.player.bullets, this.shotCollides);
         };
         Level1.prototype.missleCollides = function (obj1, obj2) {
-            obj2.alive = false;
-            obj2.exists = false;
+            obj2.explode();
         };
         Level1.prototype.shotCollides = function (obj1, obj2) {
             obj2.alive = false;
@@ -88,9 +91,14 @@ var Spaders;
         };
 
         Level1.prototype.render = function () {
-            this.game.debug.spriteInfo(this.enemy, 10, 80);
-            this.game.debug.spriteInfo(this.player, 10, 10);
-            this.game.debug.quadTree(this.game.physics.arcade.quadTree);
+            if (this.debug == true) {
+                if (this.player.missles.getFirstAlive() !== null)
+                    this.game.debug.body(this.player.missles.getFirstAlive());
+
+                this.game.debug.body(this.enemy);
+                this.game.debug.spriteInfo(this.enemy, 10, 80);
+                this.game.debug.spriteInfo(this.player, 10, 10);
+            }
         };
         return Level1;
     })(Phaser.State);
@@ -131,18 +139,30 @@ var Spaders;
 (function (Spaders) {
     var Missle = (function (_super) {
         __extends(Missle, _super);
-        function Missle() {
-            _super.apply(this, arguments);
+        function Missle(game) {
+            _super.call(this, game, 0, 0, 'missle_shot', 0);
+            this.alive = false;
+            this.exists = false;
+
+            this.game.physics.enable(this, Phaser.Physics.ARCADE);
+
+            this.anchor.setTo(0.5, 0.5);
+
+            //(<Phaser.Physics.Arcade.Body>this.body).setSize(1, 1, 0, 0);
+            this.body.allowRotation = false;
         }
-        Missle.prototype.update = function () {
+        Missle.prototype.explode = function () {
+            // create an explosion in the current location
+            var explosion = this.game.add.sprite(this.x, this.y, 'explosion_1');
+            explosion.anchor.setTo(0.5, 0.5);
+            var anim = explosion.animations.add('boom');
+            anim.play(10, false, true);
+            this.alive = false;
+            this.exists = false;
         };
 
         Missle.prototype.fire = function () {
             this.rotation = 0;
-
-            this.game.physics.enable(this, Phaser.Physics.ARCADE);
-            this.body.allowRotation = false;
-            this.anchor.setTo(0.5, 0.5);
 
             var children = this.game.world.children;
             var found = false;
@@ -190,12 +210,10 @@ var Spaders;
             this.bullets.setAll('outOfBoundsKill', true);
 
             this.missles = game.add.group(this, 'missles');
-            this.missles.enableBody = true;
             this.missles.physicsBodyType = Phaser.Physics.ARCADE;
+            this.missles.enableBody = true;
             for (var i = 0; i < 10; i++) {
-                this.missles.add(new Spaders.Missle(game, 0, 0, 'missle_shot'));
-                this.missles.getAt(i).alive = false;
-                this.missles.getAt(i).exists = false;
+                this.missles.add(new Spaders.Missle(game));
             }
 
             this.missles.setAll('checkWorldBounds', true);
@@ -283,6 +301,7 @@ var Spaders;
             this.load.image('enemy_1', 'assets/enemy_1.png');
             this.load.image('titlepage', 'assets/spaders.png');
             this.load.image('p_star', 'assets/star_particle.jpg');
+            this.load.spritesheet('explosion_1', 'assets/explosion_26x26.png', 26, 26);
             this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png', 2, 2);
             this.load.image('player_shot_1', 'assets/ship_bullet_1.png');
             this.load.image('missle_shot', 'assets/missle.png');

@@ -30,12 +30,10 @@
             this.bullets.setAll('outOfBoundsKill', true);
 
             this.missles = game.add.group(this, 'missles');
-            this.missles.enableBody = true;
             this.missles.physicsBodyType = Phaser.Physics.ARCADE;
+            this.missles.enableBody = true;
             for (var i = 0; i < 10; i++) {
-                this.missles.add(new Missle(game, 0, 0, 'missle_shot'));
-                this.missles.getAt(i).alive = false;
-                this.missles.getAt(i).exists = false;
+                this.missles.add(new Missle(game));
             }
 
             this.missles.setAll('checkWorldBounds', true);

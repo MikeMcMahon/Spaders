@@ -19,6 +19,7 @@
   <ItemGroup>
     <Content Include="app.css" />
     <Content Include="assets\enemy_1.png" />
+    <Content Include="assets\explosion_26x26.png" />
     <Content Include="assets\ship_bullet_1.png" />
     <Content Include="assets\star_particle.jpg" />
     <Content Include="index.html" />
