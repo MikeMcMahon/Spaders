@@ -46,6 +46,7 @@ var Spaders;
             this.maxHealth = map["health"];
             this.health = this.maxHealth;
 
+            this.alive = false;
             this.anchor.setTo(0.5, 0.5);
             this.angle = 90;
             this.events.onRevived.add(this.restore, this);
@@ -59,6 +60,58 @@ var Spaders;
         return Enemy;
     })(Phaser.Sprite);
     Spaders.Enemy = Enemy;
+})(Spaders || (Spaders = {}));
+var Spaders;
+(function (Spaders) {
+    var Projectile = (function (_super) {
+        __extends(Projectile, _super);
+        function Projectile(id, game, key, x, y) {
+            this.typeInfo = game.cache.getJSON('projectiles')[key];
+            _super.call(this, game, x, y, this.typeInfo["key"]);
+
+            this.firePower = this.typeInfo["damage"];
+            this.fireRate = this.typeInfo["fire_rate"];
+        }
+        Projectile.prototype.fire = function () {
+            throw new Error('this is up to the implementor to call');
+        };
+
+        Projectile.prototype.doDamage = function (enemy) {
+            enemy.damage(this.firePower);
+            this.kill();
+        };
+
+        /**
+        * Certain weapons have upgrades / downgrades
+        */
+        Projectile.prototype.upgrade = function () {
+        };
+
+        Projectile.prototype.downgrade = function () {
+        };
+        return Projectile;
+    })(Phaser.Sprite);
+    Spaders.Projectile = Projectile;
+})(Spaders || (Spaders = {}));
+///<reference path='Projectile.ts'/>
+var Spaders;
+(function (Spaders) {
+    var EnergyBullet = (function (_super) {
+        __extends(EnergyBullet, _super);
+        function EnergyBullet(game) {
+            _super.call(this, 0, game, "shot_1", 0, 0);
+            this.alive = false;
+            this.exists = false;
+
+            this.game.physics.enable(this, Phaser.Physics.ARCADE);
+            this.body.allowRotation = false;
+        }
+        EnergyBullet.prototype.fire = function () {
+            this.game.physics.arcade.moveToXY(this, this.x, 0, 650);
+        };
+        return EnergyBullet;
+    })(Spaders.Projectile);
+    Spaders.EnergyBullet = EnergyBullet;
 })(Spaders || (Spaders = {}));
 var Spaders;
 (function (Spaders) {
@@ -96,7 +149,6 @@ var Spaders;
             this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
             var enemyMap = this.cache.getJSON('enemy_map');
             for (var i = 0; i < 10; i++) {
-                this.cache.getJSON('enemy_map');
                 this.enemies.add(new Spaders.Enemy(i, this.game, Math.random() * this.game.world.width, Math.random() * this.game.world.height, 'enemy_1', enemyMap['flyer']));
             }
             this.enemies.enableBodyDebug = true;
@@ -113,17 +165,13 @@ var Spaders;
                 dead.reset(Math.random() * this.game.world.width, Math.random() * this.game.world.height);
                 dead.revive();
             }
-            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.missleCollides);
-            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.shotCollides);
+
+            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
+            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
         };
 
-        Level1.prototype.missleCollides = function (obj1, obj2) {
-            obj2.explode();
-            obj1.damage(25);
-        };
-        Level1.prototype.shotCollides = function (obj1, obj2) {
-            obj2.kill();
-            obj1.damage(10);
+        Level1.prototype.playerShot = function (e, p) {
+            p.doDamage(e);
         };
 
         Level1.prototype.render = function () {
@@ -166,31 +214,40 @@ var Spaders;
     })(Phaser.State);
     Spaders.MainMenu = MainMenu;
 })(Spaders || (Spaders = {}));
+///<reference path='Projectile.ts'/>
 var Spaders;
 (function (Spaders) {
     var Missle = (function (_super) {
         __extends(Missle, _super);
         function Missle(game) {
-            _super.call(this, game, 0, 0, 'missle_shot', 0);
+            _super.call(this, 0, game, 'missle_1', 0, 0);
             this.alive = false;
             this.exists = false;
 
             this.game.physics.enable(this, Phaser.Physics.ARCADE);
-
+            this.curTracking = null;
             this.anchor.setTo(0.5, 0.5);
             this.body.allowRotation = false;
         }
         Missle.prototype.update = function () {
+            if (this.curTracking !== null) {
+                if (!this.curTracking.alive) {
+                    //(<Phaser.Physics.Arcade.Body>this.body).acceleration.setTo(-300, -300);
+                    this.fire();
+                } else {
+                    this.rotation = this.game.physics.arcade.moveToObject(this, this.curTracking, 300); //, 800, 800);
+                }
+            }
         };
 
-        Missle.prototype.explode = function () {
+        Missle.prototype.doDamage = function (enemy) {
             // create an explosion in the current location
             var explosion = this.game.add.sprite(this.x, this.y, 'explosion_1');
             explosion.anchor.setTo(0.5, 0.5);
             var anim = explosion.animations.add('boom');
             anim.play(10, false, true);
-            this.alive = false;
-            this.exists = false;
+
+            _super.prototype.doDamage.call(this, enemy);
         };
 
         Missle.prototype.fire = function () {
@@ -199,14 +256,27 @@ var Spaders;
             for (var i = 0; i < children.length; i++) {
                 if (children[i] instanceof Phaser.Group) {
                     if (children[i].name === "enemies") {
-                        var first = children[i].getFirstAlive();
+                        var enemies = children[i].children;
 
-                        if (first === null)
+                        // Get the closest enemy and SHOOT THEIR FACE OFF
+                        var enemy;
+                        var maxDistance = 99999;
+                        for (var c = 0; c < enemies.length; c++) {
+                            if (enemies[c].alive) {
+                                var d = this.game.physics.arcade.distanceBetween(this, enemies[c]);
+                                if (d <= maxDistance) {
+                                    maxDistance = d;
+                                    enemy = enemies[c];
+                                }
+                            }
+                        }
+
+                        if (enemy === null)
                             break;
 
                         found = true;
-                        this.rotation = this.game.physics.arcade.accelerateToObject(this, first, 300, 800, 800);
-                        this.curTracking = first;
+                        this.rotation = this.game.physics.arcade.moveToObject(this, enemy, 300); //, 800, 800);
+                        this.curTracking = enemy;
                         break;
                     }
                 }
@@ -218,7 +288,7 @@ var Spaders;
             }
         };
         return Missle;
-    })(Phaser.Sprite);
+    })(Spaders.Projectile);
     Spaders.Missle = Missle;
 })(Spaders || (Spaders = {}));
 var Spaders;
@@ -241,7 +311,9 @@ var Spaders;
             this.bullets = game.add.group(this, 'gun');
             this.bullets.enableBody = true;
             this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-            this.bullets.createMultiple(50, 'player_shot_1');
+            for (var i = 0; i < 50; i++) {
+                this.bullets.add(new Spaders.EnergyBullet(game));
+            }
             this.bullets.setAll('checkWorldBounds', true);
             this.bullets.setAll('outOfBoundsKill', true);
 
@@ -297,12 +369,9 @@ var Spaders;
             if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0) {
                 this.nextFire = this.game.time.now + this.fireRate;
                 var bullet = this.bullets.getFirstDead();
-
                 var x = this.x - (bullet.width / 2);
-
                 bullet.reset(x, this.y - (this.height / 2) - bullet.height - 1);
-
-                this.game.physics.arcade.moveToXY(bullet, x, 0, 650);
+                bullet.fire();
             }
 
             if (this.game.time.now > this.nextMissle && this.missles.countDead() > 0) {
@@ -339,8 +408,8 @@ var Spaders;
             this.load.image('p_star', 'assets/star_particle.jpg');
             this.load.spritesheet('explosion_1', 'assets/explosion_26x26.png', 26, 26);
             this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png', 2, 2);
-            this.load.image('player_shot_1', 'assets/ship_bullet_1.png');
-            this.load.image('missle_shot', 'assets/missle.png');
+            this.load.image('s_energy_1', 'assets/ship_bullet_1.png');
+            this.load.image('s_missle_1', 'assets/missle.png');
             this.load.json('enemy_map', 'maps/enemies.js');
             this.load.json('projectiles', 'maps/projectiles.js');
         };

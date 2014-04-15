@@ -18,8 +18,8 @@
             this.load.image('p_star', 'assets/star_particle.jpg');
             this.load.spritesheet('explosion_1', 'assets/explosion_26x26.png', 26, 26);
             this.load.spritesheet('p_ship_thrust', 'assets/ship_trail_particle.png', 2, 2);
-            this.load.image('player_shot_1', 'assets/ship_bullet_1.png');
-            this.load.image('missle_shot', 'assets/missle.png');
+            this.load.image('s_energy_1', 'assets/ship_bullet_1.png');
+            this.load.image('s_missle_1', 'assets/missle.png');
             this.load.json('enemy_map', 'maps/enemies.js');
             this.load.json('projectiles', 'maps/projectiles.js');
         }

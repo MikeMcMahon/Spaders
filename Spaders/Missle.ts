@@ -1,46 +1,67 @@
-﻿module Spaders {
-    export class Missle extends Phaser.Sprite {
+﻿///<reference path='Projectile.ts'/>
+module Spaders {
+    export class Missle extends Projectile {
         curTracking: Enemy;
 
         constructor(game: Phaser.Game) {
-            super(game, 0, 0, 'missle_shot', 0);
+            super(0, game, 'missle_1', 0, 0);
             this.alive = false;
             this.exists = false;
 
             this.game.physics.enable(this, Phaser.Physics.ARCADE);
-
+            this.curTracking = null;
             this.anchor.setTo(0.5, 0.5);
             (<Phaser.Physics.Arcade.Body>this.body).allowRotation = false;
         }
 
         update() {
+            if (this.curTracking !== null) {
+                if (!this.curTracking.alive) {
+                    //(<Phaser.Physics.Arcade.Body>this.body).acceleration.setTo(-300, -300);
+                    this.fire();
+                } else {
+                    this.rotation = this.game.physics.arcade.moveToObject(this, this.curTracking, 300);//, 800, 800);
+                }
+            }
         }
 
-        explode(): void {
+        doDamage(enemy: Enemy): void {
             // create an explosion in the current location
             var explosion = this.game.add.sprite(this.x, this.y, 'explosion_1');
             explosion.anchor.setTo(0.5, 0.5);
             var anim = explosion.animations.add('boom');
             anim.play(10, false, true);
-            this.alive = false;
-            this.exists = false;
+
+            super.doDamage(enemy);
         }
 
         fire(): void {
-
             var children = this.game.world.children;
             var found = false;
             for (var i = 0; i < children.length; i++) {
                 if (children[i] instanceof Phaser.Group) {
                     if ((<Phaser.Group>children[i]).name === "enemies") {
-                        var first = (<Phaser.Group>children[i]).getFirstAlive();
+                        var enemies = (<Phaser.Group>children[i]).children;
 
-                        if (first === null)
+                        // Get the closest enemy and SHOOT THEIR FACE OFF
+                        var enemy;
+                        var maxDistance = 99999;
+                        for (var c = 0; c < enemies.length; c++) {
+                            if ((<Enemy>enemies[c]).alive) {
+                                var d = this.game.physics.arcade.distanceBetween(this, (<Enemy>enemies[c]));
+                                if (d <= maxDistance) {
+                                    maxDistance = d;
+                                    enemy = enemies[c];
+                                }
+                            }
+                        }
+
+                        if (enemy === null)
                             break;
 
                         found = true;
-                        this.rotation = this.game.physics.arcade.accelerateToObject(this, first, 300, 800, 800);
-                        this.curTracking = first;
+                        this.rotation = this.game.physics.arcade.moveToObject(this, enemy, 300); //, 800, 800);
+                        this.curTracking = enemy;
                         break;
                     }
                 }

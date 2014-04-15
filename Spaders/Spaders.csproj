@@ -25,6 +25,7 @@
     <Content Include="index.html" />
     <Content Include="assets\loading-bar.png" />
     <Content Include="assets\missle.png" />
+    <Content Include="maps\projectiles.js" />
     <Content Include="phaser.js" />
     <Content Include="phaser.min.js" />
     <Content Include="assets\ship.png" />
@@ -36,6 +37,7 @@
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="Boot.ts" />
     <TypeScriptCompile Include="Enemy.ts" />
+    <TypeScriptCompile Include="EnergyBullet.ts" />
     <TypeScriptCompile Include="Game.ts" />
     <TypeScriptCompile Include="Level1.ts" />
     <TypeScriptCompile Include="MainMenu.ts" />
@@ -43,6 +45,7 @@
     <TypeScriptCompile Include="phaser.d.ts" />
     <TypeScriptCompile Include="Player.ts" />
     <TypeScriptCompile Include="Preloader.ts" />
+    <TypeScriptCompile Include="Projectile.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="maps\enemies.js" />

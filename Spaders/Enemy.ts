@@ -8,6 +8,7 @@
             this.maxHealth = map["health"];
             this.health = this.maxHealth;
 
+            this.alive = false;
             this.anchor.setTo(0.5, 0.5);
             this.angle = 90;
             this.events.onRevived.add(this.restore, this);

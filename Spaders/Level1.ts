@@ -15,7 +15,6 @@
             this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
             var enemyMap = this.cache.getJSON('enemy_map');
             for (var i = 0; i < 10; i++) {
-                this.cache.getJSON('enemy_map');
                 this.enemies.add(
                     new Enemy(
                         i,
@@ -45,17 +44,13 @@
                     );
                 dead.revive();
             }
-            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.missleCollides);
-            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.shotCollides);
+
+            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
+            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
         }
 
-        missleCollides(obj1: Enemy, obj2: Missle): void {
-            obj2.explode();
-            obj1.damage(25);
-        }
-        shotCollides(obj1: Enemy, obj2: Phaser.Sprite): void {
-            obj2.kill();
-            obj1.damage(10);
+        playerShot(e: Enemy, p: Projectile): void {
+            p.doDamage(e);
         }
 
         render() {

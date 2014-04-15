@@ -1,6 +1,6 @@
 ﻿{
     "flyer": {
         "name": "flyer",
-        "health": 50
+        "health": 30
     }
 }

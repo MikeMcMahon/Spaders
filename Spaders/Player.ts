@@ -4,12 +4,12 @@
     {
         lThrust: Phaser.Particles.Arcade.Emitter;
         rThrust: Phaser.Particles.Arcade.Emitter;
-        bullets: Phaser.Group;
-        missles: Phaser.Group;
 
+        bullets: Phaser.Group;
         fireRate = 90;
         nextFire = 0;
 
+        missles: Phaser.Group;
         missleRate = 550;
         nextMissle = 0;
 
@@ -25,7 +25,9 @@
             this.bullets = game.add.group(this, 'gun');
             this.bullets.enableBody = true;
             this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-            this.bullets.createMultiple(50, 'player_shot_1');
+            for (var i = 0; i < 50; i++) {
+                this.bullets.add(new EnergyBullet(game));
+            }
             this.bullets.setAll('checkWorldBounds', true);
             this.bullets.setAll('outOfBoundsKill', true);
 
@@ -83,18 +85,15 @@
         {
             if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0) {
                 this.nextFire = this.game.time.now + this.fireRate;
-                var bullet = <Phaser.Sprite>this.bullets.getFirstDead();
-
+                var bullet = this.bullets.getFirstDead();
                 var x = this.x - (bullet.width / 2);
-
                 bullet.reset(x, this.y - (this.height / 2) - bullet.height - 1);
-
-                this.game.physics.arcade.moveToXY(bullet, x, 0, 650);
+                bullet.fire();
             }
 
             if (this.game.time.now > this.nextMissle && this.missles.countDead() > 0) {
                 this.nextMissle = this.game.time.now + this.missleRate;
-                var missle = <Missle>this.missles.getFirstDead();
+                var missle = this.missles.getFirstDead();
                 missle.reset(this.x + (this.width / 2) - 20, this.y - 8);
                 missle.fire();
             }
