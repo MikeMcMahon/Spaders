@@ -2,8 +2,9 @@
 module Spaders {
     export class Missle extends Projectile {
         curTracking: Enemy;
+        curPlayer: Player;
 
-        constructor(game: Phaser.Game) {
+        constructor(game: Phaser.Game, player: Player) {
             super(0, game, 'missle_1', 0, 0);
             this.alive = false;
             this.exists = false;
@@ -12,6 +13,7 @@ module Spaders {
             this.curTracking = null;
             this.anchor.setTo(0.5, 0.5);
             (<Phaser.Physics.Arcade.Body>this.body).allowRotation = false;
+            this.curPlayer = player;
         }
 
         update() {
@@ -26,12 +28,10 @@ module Spaders {
         }
 
         doDamage(enemy: Enemy): void {
-            // create an explosion in the current location
-            var explosion = this.game.add.sprite(this.x, this.y, 'explosion_1');
-            explosion.anchor.setTo(0.5, 0.5);
-            var anim = explosion.animations.add('boom');
+            var explosion = <Phaser.Sprite>this.curPlayer.missleExplosions.getFirstDead();
+            explosion.reset(this.x, this.y);
+            var anim = explosion.animations.getAnimation('boom');
             anim.play(10, false, true);
-
             super.doDamage(enemy);
         }
 

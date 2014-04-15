@@ -23,9 +23,14 @@ var Spaders;
             this.input.maxPointers = 1;
             this.stage.disableVisibilityChange = true;
 
+            this.game.scale.minHeight = 480;
+            this.game.scale.minWidth = 270;
+            this.game.scale.maxWidth = this.game.world.width;
+            this.game.scale.maxHeight = this.game.world.height;
+            this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            this.game.scale.setScreenSize(true);
+
             if (this.game.device.desktop) {
-                this.scale.pageAlignHorizontally = true;
-                this.scale.pageAlignVertically = true;
             } else {
                 // mobile settings
             }
@@ -105,9 +110,10 @@ var Spaders;
 
             this.game.physics.enable(this, Phaser.Physics.ARCADE);
             this.body.allowRotation = false;
+            this.anchor.setTo(0.5, 0.5);
         }
         EnergyBullet.prototype.fire = function () {
-            this.game.physics.arcade.moveToXY(this, this.x, 0, 650);
+            this.game.physics.arcade.moveToXY(this, this.x, -100, 650);
         };
         return EnergyBullet;
     })(Spaders.Projectile);
@@ -118,7 +124,7 @@ var Spaders;
     var Game = (function (_super) {
         __extends(Game, _super);
         function Game() {
-            _super.call(this, 640, 640, Phaser.CANVAS, 'content', null);
+            _super.call(this, 540, 960, Phaser.CANVAS, 'content', null);
 
             this.state.add('Boot', Spaders.Boot, false);
             this.state.add('Preloader', Spaders.Preloader, false);
@@ -219,7 +225,7 @@ var Spaders;
 (function (Spaders) {
     var Missle = (function (_super) {
         __extends(Missle, _super);
-        function Missle(game) {
+        function Missle(game, player) {
             _super.call(this, 0, game, 'missle_1', 0, 0);
             this.alive = false;
             this.exists = false;
@@ -228,6 +234,7 @@ var Spaders;
             this.curTracking = null;
             this.anchor.setTo(0.5, 0.5);
             this.body.allowRotation = false;
+            this.curPlayer = player;
         }
         Missle.prototype.update = function () {
             if (this.curTracking !== null) {
@@ -241,12 +248,10 @@ var Spaders;
         };
 
         Missle.prototype.doDamage = function (enemy) {
-            // create an explosion in the current location
-            var explosion = this.game.add.sprite(this.x, this.y, 'explosion_1');
-            explosion.anchor.setTo(0.5, 0.5);
-            var anim = explosion.animations.add('boom');
+            var explosion = this.curPlayer.missleExplosions.getFirstDead();
+            explosion.reset(this.x, this.y);
+            var anim = explosion.animations.getAnimation('boom');
             anim.play(10, false, true);
-
             _super.prototype.doDamage.call(this, enemy);
         };
 
@@ -305,7 +310,7 @@ var Spaders;
             game.physics.enable(this, Phaser.Physics.ARCADE);
             game.add.existing(this);
 
-            this.configure_thrusters();
+            //this.configure_thrusters();
             this.anchor.setTo(0.5, 0.5);
 
             this.bullets = game.add.group(this, 'gun');
@@ -321,12 +326,22 @@ var Spaders;
             this.missles.physicsBodyType = Phaser.Physics.ARCADE;
             this.missles.enableBody = true;
             for (var i = 0; i < 10; i++) {
-                this.missles.add(new Spaders.Missle(game));
+                this.missles.add(new Spaders.Missle(game, this));
             }
-
             this.missles.setAll('checkWorldBounds', true);
             this.missles.setAll('outOfBoundsKill', true);
 
+            this.missleExplosions = game.add.group(this, 'missle_explosions');
+            this.missleExplosions.createMultiple(10, 'explosion_1', 0, false);
+            this.missleExplosions.alive = false;
+            this.missleExplosions.setAll('checkWorldBounds', true);
+            this.missleExplosions.setAll('outOfBoundsKill', true);
+            this.missleExplosions.forEach(function (obj) {
+                obj.anchor.setTo(0.5, 0.5);
+                obj.animations.add('boom');
+            }, this);
+
+            this.game.add.existing(this.missleExplosions);
             this.game.add.existing(this.bullets);
             this.game.add.existing(this.missles);
         }
@@ -353,11 +368,10 @@ var Spaders;
         };
 
         Player.prototype.update = function () {
-            this.lThrust.x = this.x + 4;
-            this.lThrust.y = this.y + this.height;
-            this.rThrust.x = this.x + 30;
-            this.rThrust.y = this.y + this.height;
-
+            //this.lThrust.x = this.x + 4;
+            //this.lThrust.y = this.y + this.height;
+            //this.rThrust.x = this.x + 30;
+            //this.rThrust.y = this.y + this.height;
             this.game.physics.arcade.moveToPointer(this, 60, this.game.input.activePointer, 500);
 
             if (this.game.input.activePointer.isDown) {
@@ -369,8 +383,7 @@ var Spaders;
             if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0) {
                 this.nextFire = this.game.time.now + this.fireRate;
                 var bullet = this.bullets.getFirstDead();
-                var x = this.x - (bullet.width / 2);
-                bullet.reset(x, this.y - (this.height / 2) - bullet.height - 1);
+                bullet.reset(this.x, this.y - (this.height / 2));
                 bullet.fire();
             }
 

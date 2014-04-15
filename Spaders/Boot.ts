@@ -13,9 +13,15 @@
             this.input.maxPointers = 1;
             this.stage.disableVisibilityChange = true;
 
+            this.game.scale.minHeight = 480;
+            this.game.scale.minWidth = 270;
+            this.game.scale.maxWidth = this.game.world.width;
+            this.game.scale.maxHeight = this.game.world.height;
+            this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            this.game.scale.setScreenSize(true);
+
             if (this.game.device.desktop) {
-                this.scale.pageAlignHorizontally = true;
-                this.scale.pageAlignVertically = true;
+                
             } else {
                 // mobile settings
             }

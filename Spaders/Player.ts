@@ -10,6 +10,7 @@
         nextFire = 0;
 
         missles: Phaser.Group;
+        missleExplosions: Phaser.Group;
         missleRate = 550;
         nextMissle = 0;
 
@@ -19,7 +20,7 @@
             game.physics.enable(this, Phaser.Physics.ARCADE);
             game.add.existing(this);
 
-            this.configure_thrusters();
+            //this.configure_thrusters();
             this.anchor.setTo(0.5, 0.5);
 
             this.bullets = game.add.group(this, 'gun');
@@ -35,12 +36,22 @@
             this.missles.physicsBodyType = Phaser.Physics.ARCADE;
             this.missles.enableBody = true;
             for (var i = 0; i < 10; i++) {
-                this.missles.add(new Missle(game));
+                this.missles.add(new Missle(game, this));
             }
-
             this.missles.setAll('checkWorldBounds', true);
             this.missles.setAll('outOfBoundsKill', true);
 
+            this.missleExplosions = game.add.group(this, 'missle_explosions');
+            this.missleExplosions.createMultiple(10, 'explosion_1', 0, false);
+            this.missleExplosions.alive = false;
+            this.missleExplosions.setAll('checkWorldBounds', true);
+            this.missleExplosions.setAll('outOfBoundsKill', true);
+            this.missleExplosions.forEach(function (obj: Phaser.Sprite) {
+                obj.anchor.setTo(0.5, 0.5);
+                obj.animations.add('boom');
+            }, this);
+
+            this.game.add.existing(this.missleExplosions);
             this.game.add.existing(this.bullets);
             this.game.add.existing(this.missles);
         }
@@ -69,10 +80,10 @@
 
         update()
         {
-            this.lThrust.x = this.x + 4;
-            this.lThrust.y = this.y + this.height;
-            this.rThrust.x = this.x + 30;
-            this.rThrust.y = this.y + this.height;
+            //this.lThrust.x = this.x + 4;
+            //this.lThrust.y = this.y + this.height;
+            //this.rThrust.x = this.x + 30;
+            //this.rThrust.y = this.y + this.height;
 
             this.game.physics.arcade.moveToPointer(this, 60, this.game.input.activePointer, 500);
 
@@ -86,8 +97,7 @@
             if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0) {
                 this.nextFire = this.game.time.now + this.fireRate;
                 var bullet = this.bullets.getFirstDead();
-                var x = this.x - (bullet.width / 2);
-                bullet.reset(x, this.y - (this.height / 2) - bullet.height - 1);
+                bullet.reset(this.x, this.y - (this.height / 2));
                 bullet.fire();
             }
 
