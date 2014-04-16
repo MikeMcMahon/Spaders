@@ -25,7 +25,7 @@
     <Content Include="index.html" />
     <Content Include="assets\loading-bar.png" />
     <Content Include="assets\missle.png" />
-    <Content Include="maps\projectiles.js" />
+    <None Include="maps\projectiles.json" />
     <Content Include="phaser.js" />
     <Content Include="phaser.min.js" />
     <Content Include="assets\ship.png" />
@@ -48,7 +48,10 @@
     <TypeScriptCompile Include="Projectile.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="maps\enemies.js" />
+    <None Include="maps\enemies.json" />
+    <Content Include="scripts\level1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

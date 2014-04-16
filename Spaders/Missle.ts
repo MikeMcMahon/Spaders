@@ -15,7 +15,8 @@ module Spaders {
             (<Phaser.Physics.Arcade.Body>this.body).allowRotation = false;
             this.curPlayer = player;
         }
-
+        
+        // TODO - we need to break out tracking a new enemy and just firing ze missle
         update() {
             if (this.curTracking !== null) {
                 if (!this.curTracking.alive) {

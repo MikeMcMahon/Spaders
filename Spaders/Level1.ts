@@ -5,7 +5,7 @@
         enemies: Phaser.Group;
 
         create() {
-            this.debug = false;
+            this.debug = true;
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -14,6 +14,17 @@
             this.enemies.enableBody = true;
             this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
             var enemyMap = this.cache.getJSON('enemy_map');
+
+            // TODO - this should really happen in a loading screen to prep the level!
+            // Prevents us from instantiating too much during runtime
+            var script = this.cache.getJSON('level1');
+            var waves = script["waves"] || null;
+            if (waves !== null) {
+                for (var w in waves) {
+
+                }
+            }
+
             for (var i = 0; i < 10; i++) {
                 this.enemies.add(
                     new Enemy(
@@ -21,7 +32,7 @@
                         this.game,
                         Math.random() * this.game.world.width,
                         Math.random() * this.game.world.height,
-                        'enemy_1',
+                        enemyMap['flyer']['key'],
                         enemyMap['flyer']
                         )
                     );
@@ -36,14 +47,14 @@
 
 
         update() {
-            var dead = <Enemy>this.enemies.getFirstDead();
+            /*var dead = <Enemy>this.enemies.getFirstDead();
             if (dead !== null) {
                 dead.reset(
                     Math.random() * this.game.world.width,
                     Math.random() * this.game.world.height
                     );
                 dead.revive();
-            }
+            }*/
 
             this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
             this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
@@ -56,6 +67,7 @@
         render() {
             if (this.debug == true) {
                 this.game.debug.spriteInfo(this.player, 10, 10);
+                this.game.debug.pointer(this.input.activePointer);
             }
         }
     }

@@ -14,6 +14,17 @@
             this.events.onRevived.add(this.restore, this);
         }
 
+        damage(amount: number) : Phaser.Sprite {
+            var tween = this.game.add.tween(this);
+            tween.to({ tint: 0xff0000 }, 100, Phaser.Easing.Linear.None, true);
+            tween.onComplete.add(function () {
+                var tween = this.game.add.tween(this);
+                tween.to({ tint: 0xFFFFFF }, 100, Phaser.Easing.Linear.None, true);
+            }, this);
+            
+            return super.damage(amount);
+        }
+
         restore() {
             this.health = this.maxHealth;
         }
