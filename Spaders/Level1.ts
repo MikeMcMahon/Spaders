@@ -21,7 +21,7 @@
             var waves = script["waves"] || null;
             if (waves !== null) {
                 for (var w in waves) {
-
+                    this.enemies.add(this.game.add.group(this.enemies, w.name));
                 }
             }
 
