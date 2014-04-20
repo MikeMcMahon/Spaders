@@ -21,11 +21,35 @@
             var waves = script["waves"] || null;
             if (waves !== null) {
                 for (var w in waves) {
-                    this.enemies.add(this.game.add.group(this.enemies, w.name));
+                    var g = this.game.add.group(this.enemies, waves[w]["name"]);
+                    g.enableBody = true;
+                    g.physicsBodyType = Phaser.Physics.ARCADE;
+
+                    var groups = waves[w]["groups"];
+                    for (var grp in groups) {
+                        var key = groups[grp]["key"];
+                        var t = groups[grp]["total"];
+                        alert(key + t);
+                        for (var i = 0; i < t; i++) {
+                            g.add(
+                                new Enemy(
+                                    i,
+                                    this.game,
+                                    Math.random() * this.game.world.width,
+                                    Math.random() * this.game.world.height / 2,
+                                    enemyMap[key]['key'],
+                                    enemyMap[key]
+                                    )
+                                );
+                        }
+                        g.alive = true;
+                    }
+
+                    this.enemies.add(g);
                 }
             }
 
-            for (var i = 0; i < 10; i++) {
+            /*for (var i = 0; i < 10; i++) {
                 this.enemies.add(
                     new Enemy(
                         i,
@@ -36,11 +60,8 @@
                         enemyMap['flyer']
                         )
                     );
-            }
+            }*/
             this.enemies.enableBodyDebug = true;
-            this.enemies.setAll('alive', true);
-            this.enemies.setAll('body.immovable', true);
-
             this.player = new Spaders.Player(this.game, 60, 60);
             this.player.missles.enableBodyDebug = true;
         }
@@ -55,9 +76,14 @@
                     );
                 dead.revive();
             }*/
+            this.enemies.forEach(this.collisionDetection, this);
+           // this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
+           // this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
+        }
 
-            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
-            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
+        collisionDetection(grp: Phaser.Group) {
+            this.game.physics.arcade.overlap(grp, this.player.missles, this.playerShot);
+            this.game.physics.arcade.overlap(grp, this.player.bullets, this.playerShot);
         }
 
         playerShot(e: Enemy, p: Projectile): void {

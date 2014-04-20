@@ -36,6 +36,12 @@ module Spaders {
             super.doDamage(enemy);
         }
 
+        findEnemy(): Phaser.Point {
+            var p = new Phaser.Point();
+
+            return p;
+        }
+
         fire(): void {
             var children = this.game.world.children;
             var found = false;

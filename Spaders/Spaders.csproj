@@ -22,6 +22,7 @@
     <Content Include="assets\explosion_26x26.png" />
     <Content Include="assets\ship_bullet_1.png" />
     <Content Include="assets\star_particle.jpg" />
+    <Content Include="assets\star_particles.png" />
     <Content Include="index.html" />
     <Content Include="assets\loading-bar.png" />
     <Content Include="assets\missle.png" />
