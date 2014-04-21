@@ -13,6 +13,7 @@
             this.enemies.name = 'enemies';
             this.enemies.enableBody = true;
             this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
             var enemyMap = this.cache.getJSON('enemy_map');
 
             // TODO - this should really happen in a loading screen to prep the level!
@@ -21,17 +22,12 @@
             var waves = script["waves"] || null;
             if (waves !== null) {
                 for (var w in waves) {
-                    var g = this.game.add.group(this.enemies, waves[w]["name"]);
-                    g.enableBody = true;
-                    g.physicsBodyType = Phaser.Physics.ARCADE;
-
                     var groups = waves[w]["groups"];
                     for (var grp in groups) {
                         var key = groups[grp]["key"];
                         var t = groups[grp]["total"];
-                        alert(key + t);
                         for (var i = 0; i < t; i++) {
-                            g.add(
+                            this.enemies.add(
                                 new Enemy(
                                     i,
                                     this.game,
@@ -42,25 +38,11 @@
                                     )
                                 );
                         }
-                        g.alive = true;
                     }
 
-                    this.enemies.add(g);
                 }
             }
-
-            /*for (var i = 0; i < 10; i++) {
-                this.enemies.add(
-                    new Enemy(
-                        i,
-                        this.game,
-                        Math.random() * this.game.world.width,
-                        Math.random() * this.game.world.height,
-                        enemyMap['flyer']['key'],
-                        enemyMap['flyer']
-                        )
-                    );
-            }*/
+            this.enemies.setAll('alive', true);
             this.enemies.enableBodyDebug = true;
             this.player = new Spaders.Player(this.game, 60, 60);
             this.player.missles.enableBodyDebug = true;
@@ -76,24 +58,21 @@
                     );
                 dead.revive();
             }*/
-            this.enemies.forEach(this.collisionDetection, this);
-           // this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
-           // this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
+            
+           this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
+           this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
         }
 
-        collisionDetection(grp: Phaser.Group) {
-            this.game.physics.arcade.overlap(grp, this.player.missles, this.playerShot);
-            this.game.physics.arcade.overlap(grp, this.player.bullets, this.playerShot);
-        }
-
+        
         playerShot(e: Enemy, p: Projectile): void {
             p.doDamage(e);
         }
 
         render() {
             if (this.debug == true) {
-                this.game.debug.spriteInfo(this.player, 10, 10);
+                this.game.debug.spriteInfo(this.player, 10, 30);
                 this.game.debug.pointer(this.input.activePointer);
+                this.game.debug.quadTree(this.game.physics.arcade.quadTree);
             }
         }
     }

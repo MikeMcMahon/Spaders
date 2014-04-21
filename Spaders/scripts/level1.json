@@ -1,8 +1,10 @@
 ﻿{
+    "opening": {
+    },
     "waves": [
         {
             "name": "wave1",
-            "time": 10,
+            "time": 10, 
             "groups": [
                 {
                     "key": "flyer",
@@ -36,5 +38,7 @@
                 }
             ]
         }
-    ]
+    ],
+    "boss": {
+    }
 }

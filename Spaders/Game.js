@@ -164,6 +164,7 @@ var Spaders;
             this.enemies.name = 'enemies';
             this.enemies.enableBody = true;
             this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
             var enemyMap = this.cache.getJSON('enemy_map');
 
             // TODO - this should really happen in a loading screen to prep the level!
@@ -172,37 +173,17 @@ var Spaders;
             var waves = script["waves"] || null;
             if (waves !== null) {
                 for (var w in waves) {
-                    var g = this.game.add.group(this.enemies, waves[w]["name"]);
-                    g.enableBody = true;
-                    g.physicsBodyType = Phaser.Physics.ARCADE;
-
                     var groups = waves[w]["groups"];
                     for (var grp in groups) {
                         var key = groups[grp]["key"];
                         var t = groups[grp]["total"];
-                        alert(key + t);
                         for (var i = 0; i < t; i++) {
-                            g.add(new Spaders.Enemy(i, this.game, Math.random() * this.game.world.width, Math.random() * this.game.world.height / 2, enemyMap[key]['key'], enemyMap[key]));
+                            this.enemies.add(new Spaders.Enemy(i, this.game, Math.random() * this.game.world.width, Math.random() * this.game.world.height / 2, enemyMap[key]['key'], enemyMap[key]));
                         }
-                        g.alive = true;
                     }
-
-                    this.enemies.add(g);
                 }
             }
-
-            /*for (var i = 0; i < 10; i++) {
-            this.enemies.add(
-            new Enemy(
-            i,
-            this.game,
-            Math.random() * this.game.world.width,
-            Math.random() * this.game.world.height,
-            enemyMap['flyer']['key'],
-            enemyMap['flyer']
-            )
-            );
-            }*/
+            this.enemies.setAll('alive', true);
             this.enemies.enableBodyDebug = true;
             this.player = new Spaders.Player(this.game, 60, 60);
             this.player.missles.enableBodyDebug = true;
@@ -217,14 +198,8 @@ var Spaders;
             );
             dead.revive();
             }*/
-            this.enemies.forEach(this.collisionDetection, this);
-            // this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
-            // this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
-        };
-
-        Level1.prototype.collisionDetection = function (grp) {
-            this.game.physics.arcade.overlap(grp, this.player.missles, this.playerShot);
-            this.game.physics.arcade.overlap(grp, this.player.bullets, this.playerShot);
+            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
+            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
         };
 
         Level1.prototype.playerShot = function (e, p) {
@@ -233,8 +208,9 @@ var Spaders;
 
         Level1.prototype.render = function () {
             if (this.debug == true) {
-                this.game.debug.spriteInfo(this.player, 10, 10);
+                this.game.debug.spriteInfo(this.player, 10, 30);
                 this.game.debug.pointer(this.input.activePointer);
+                this.game.debug.quadTree(this.game.physics.arcade.quadTree);
             }
         };
         return Level1;
@@ -308,42 +284,79 @@ var Spaders;
             _super.prototype.doDamage.call(this, enemy);
         };
 
-        Missle.prototype.fire = function () {
-            var children = this.game.world.children;
-            var found = false;
-            for (var i = 0; i < children.length; i++) {
-                if (children[i] instanceof Phaser.Group) {
-                    if (children[i].name === "enemies") {
-                        var enemies = children[i].children;
+        Missle.prototype.findEnemy = function () {
+            var p = new Phaser.Point();
 
-                        // Get the closest enemy and SHOOT THEIR FACE OFF
-                        var enemy;
-                        var maxDistance = 99999;
-                        for (var c = 0; c < enemies.length; c++) {
-                            if (enemies[c].alive) {
-                                var d = this.game.physics.arcade.distanceBetween(this, enemies[c]);
-                                if (d <= maxDistance) {
-                                    maxDistance = d;
-                                    enemy = enemies[c];
-                                }
+            var children = this.game.world.children;
+            var found = null;
+
+            for (var i = 0; i < children.length; i++) {
+                if (children[i] instanceof Phaser.Group && children[i]["name"] === "enemies") {
+                    var enemies = children[i].children;
+                    var maxDistance = 99999;
+
+                    for (var i in enemies) {
+                        if (enemies[i]["alive"]) {
+                            var d = this.game.physics.arcade.distanceBetween(this, enemies[i]);
+                            if (d <= maxDistance) {
+                                maxDistance = d;
+                                found = enemies[i];
                             }
                         }
-
-                        if (enemy === null)
-                            break;
-
-                        found = true;
-                        this.rotation = this.game.physics.arcade.moveToObject(this, enemy, 300); //, 800, 800);
-                        this.curTracking = enemy;
-                        break;
                     }
                 }
             }
 
-            if (!found) {
-                this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
-                this.angle = -90;
+            if (found === null) {
+                p.x = this.x + (this.width / 2) - 13;
+                p.y = -100;
+            } else {
+                this.curTracking = found;
+                p.x = found.x;
+                p.y = found.y;
             }
+
+            return p;
+        };
+
+        Missle.prototype.fire = function () {
+            /*var children = this.game.world.children;
+            var found = false;
+            for (var i = 0; i < children.length; i++) {
+            if (children[i] instanceof Phaser.Group) {
+            if ((<Phaser.Group>children[i]).name === "enemies") {
+            var enemies = (<Phaser.Group>children[i]).children;
+            
+            // Get the closest enemy and SHOOT THEIR FACE OFF
+            var enemy;
+            var maxDistance = 99999;
+            for (var c = 0; c < enemies.length; c++) {
+            if ((<Enemy>enemies[c]).alive) {
+            var d = this.game.physics.arcade.distanceBetween(this, (<Enemy>enemies[c]));
+            if (d <= maxDistance) {
+            maxDistance = d;
+            enemy = enemies[c];
+            }
+            }
+            }
+            
+            if (enemy === null)
+            break;
+            
+            found = true;
+            this.rotation = this.game.physics.arcade.moveToObject(this, enemy, 300); //, 800, 800);
+            this.curTracking = enemy;
+            break;
+            }
+            }
+            }*/
+            var p = this.findEnemy();
+
+            this.rotation = this.game.physics.arcade.moveToXY(this, p.x, p.y, 500);
+            //            if (!found) {
+            //                this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
+            //                this.angle = -90;
+            //            }
         };
         return Missle;
     })(Spaders.Projectile);
@@ -497,4 +510,4 @@ var Spaders;
     })(Phaser.State);
     Spaders.Preloader = Preloader;
 })(Spaders || (Spaders = {}));
-//# sourceMappingURL=Game.js.map
+//# sourceMappingURL=game.js.map

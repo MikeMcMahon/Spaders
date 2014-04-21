@@ -39,11 +39,40 @@ module Spaders {
         findEnemy(): Phaser.Point {
             var p = new Phaser.Point();
 
+            var children = this.game.world.children;
+            var found = null;
+
+            for (var i = 0; i < children.length; i++) {
+                if (children[i] instanceof Phaser.Group && children[i]["name"] === "enemies") {
+                    var enemies = (<Phaser.Group>children[i]).children;
+                    var maxDistance = 99999;
+
+                    for (var i in enemies) {
+                        if (enemies[i]["alive"]) {
+                            var d = this.game.physics.arcade.distanceBetween(this, enemies[i]);
+                            if (d <= maxDistance) {
+                                maxDistance = d;
+                                found = enemies[i];
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (found === null) {
+                p.x = this.x + (this.width / 2) - 13;
+                p.y = -100;
+            } else {
+                this.curTracking = found;
+                p.x = found.x;
+                p.y = found.y;
+            }
+
             return p;
         }
 
         fire(): void {
-            var children = this.game.world.children;
+            /*var children = this.game.world.children;
             var found = false;
             for (var i = 0; i < children.length; i++) {
                 if (children[i] instanceof Phaser.Group) {
@@ -72,12 +101,16 @@ module Spaders {
                         break;
                     }
                 }
-            }
+            }*/
 
-            if (!found) {
-                this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
-                this.angle = -90;
-            }
+            var p = this.findEnemy();
+
+            this.rotation = this.game.physics.arcade.moveToXY(this, p.x, p.y, 500);
+
+//            if (!found) {
+//                this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
+//                this.angle = -90;
+//            }
         }
     }
 } 
