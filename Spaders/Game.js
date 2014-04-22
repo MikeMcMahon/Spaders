@@ -45,8 +45,10 @@ var Spaders;
 (function (Spaders) {
     var Enemy = (function (_super) {
         __extends(Enemy, _super);
-        function Enemy(id, game, x, y, key, map) {
-            _super.call(this, game, x, y, key);
+        function Enemy(id, game, x, y, map, inactive) {
+            this.behaviorMap = map;
+            _super.call(this, game, x, y, map["key"]);
+
             this.name = map["name"] + id;
             this.maxHealth = map["health"];
             this.health = this.maxHealth;
@@ -55,6 +57,10 @@ var Spaders;
             this.anchor.setTo(0.5, 0.5);
             this.angle = 90;
             this.events.onRevived.add(this.restore, this);
+
+            if (inactive) {
+                // inactive.add(this);
+            }
         }
         Enemy.prototype.damage = function (amount) {
             var tween = this.game.add.tween(this);
@@ -160,8 +166,12 @@ var Spaders;
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-            this.enemies = this.game.add.group();
-            this.enemies.name = 'enemies';
+            this.inactiveEnemies = this.game.add.group();
+            this.inactiveEnemies.alive = false;
+            this.inactiveEnemies.enableBody = true;
+            this.inactiveEnemies.physicsBodyType = Phaser.Physics.ARCADE;
+
+            this.enemies = this.game.add.group(null, "enemies", true, true, Phaser.Physics.ARCADE);
             this.enemies.enableBody = true;
             this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
@@ -178,26 +188,45 @@ var Spaders;
                         var key = groups[grp]["key"];
                         var t = groups[grp]["total"];
                         for (var i = 0; i < t; i++) {
-                            this.enemies.add(new Spaders.Enemy(i, this.game, Math.random() * this.game.world.width, Math.random() * this.game.world.height / 2, enemyMap[key]['key'], enemyMap[key]));
+                            this.inactiveEnemies.add(new Spaders.Enemy(i, this.game, -100, -100, enemyMap[key], this.inactiveEnemies));
                         }
                     }
                 }
             }
-            this.enemies.setAll('alive', true);
+
             this.enemies.enableBodyDebug = true;
             this.player = new Spaders.Player(this.game, 60, 60);
             this.player.missles.enableBodyDebug = true;
+
+            this.game.add.existing(this.enemies);
+
+            this.executeLevelScript(script);
+        };
+
+        Level1.prototype.executeLevelScript = function (script) {
+            var wave1 = script["waves"][0];
+            this.currentWave = wave1;
+            this.game.time.events.add(Phaser.Timer.SECOND * wave1["time"], this.generateWave, this);
+        };
+
+        Level1.prototype.generateWave = function (waveDetails) {
+            var groups = this.currentWave["groups"];
+            for (var g in groups) {
+                var t = groups[g]["total"];
+                for (var i = 0; i < t; i++) {
+                    this.enemies.add(this.inactiveEnemies.getAt(i));
+                }
+                //this.inactiveEnemies.removeBetween(0, t);
+            }
+
+            this.enemies.setAll("alive", true);
+
+            this.game.time.events.add(Phaser.Timer.SECOND * 4, (function () {
+                this.game.physics.arcade.moveToXY(obj, 100, 100, 200);
+            }), this);
         };
 
         Level1.prototype.update = function () {
-            /*var dead = <Enemy>this.enemies.getFirstDead();
-            if (dead !== null) {
-            dead.reset(
-            Math.random() * this.game.world.width,
-            Math.random() * this.game.world.height
-            );
-            dead.revive();
-            }*/
             this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
             this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
         };
@@ -211,6 +240,9 @@ var Spaders;
                 this.game.debug.spriteInfo(this.player, 10, 30);
                 this.game.debug.pointer(this.input.activePointer);
                 this.game.debug.quadTree(this.game.physics.arcade.quadTree);
+
+                this.game.debug.text("Total Enemies: " + this.enemies.total, 10, 100);
+                this.game.debug.text("Total Inactive: " + this.inactiveEnemies.total, 10, 120);
             }
         };
         return Level1;

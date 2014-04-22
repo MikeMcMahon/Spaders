@@ -4,7 +4,7 @@
     "waves": [
         {
             "name": "wave1",
-            "time": 10, 
+            "time": 5, 
             "groups": [
                 {
                     "key": "flyer",
@@ -22,7 +22,7 @@
         },
         {
             "name": "wave2",
-            "time": 10,
+            "time": 5,
             "groups": [
                 {
                     "key": "flyer",
