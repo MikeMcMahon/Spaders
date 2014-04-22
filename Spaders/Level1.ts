@@ -6,7 +6,7 @@
         enemies: Phaser.Group;
 
         create() {
-            this.debug = true;
+            this.debug = false;
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -60,25 +60,29 @@
         currentWave: JSON;
         executeLevelScript(script: JSON) {
             var wave1 = script["waves"][0];
-            this.currentWave = wave1;
-            this.game.time.events.add(Phaser.Timer.SECOND * wave1["time"], this.generateWave, this);
+            this.game.time.events.add(Phaser.Timer.SECOND * wave1["startTime"], this.generateWave, this, wave1);
         }
 
         generateWave(waveDetails: JSON): void {
-            var groups = this.currentWave["groups"];
+            var groups = waveDetails["groups"];
+
+            var enemies = new Array<Enemy>();
+
             for (var g in groups) {
                 var t = groups[g]["total"];
                 for (var i = 0; i < t; i++) {
-                    this.enemies.add(this.inactiveEnemies.getAt(i));
+                    //this.enemies.add(this.inactiveEnemies.getAt(i));
+                    var e = this.inactiveEnemies.getAt(i);
+                    this.inactiveEnemies.remove(e);
+                    enemies.push(e);
                 }
-                //this.inactiveEnemies.removeBetween(0, t);
+                var w = new Wave(this.game, enemies, this.enemies, groups[g]);
             }
 
             this.enemies.setAll("alive", true);
+            this.enemies.forEach(function (obj, idx) {
 
-            this.game.time.events.add(Phaser.Timer.SECOND * 4, (function () {
-                //this.game.physics.arcade.moveToXY(obj, 100, 100, 200);
-            }), this);
+            }, this);
         }
 
         update() {

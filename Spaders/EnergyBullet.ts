@@ -13,7 +13,7 @@ module Spaders {
 
 
         fire(): void {
-            this.game.physics.arcade.moveToXY(this, this.x, -100, 650);
+            this.game.physics.arcade.moveToXY(this, this.x, -100, 850);
         }
     }
 } 
