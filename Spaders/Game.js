@@ -130,7 +130,7 @@ var Spaders;
             this.anchor.setTo(0.5, 0.5);
         }
         EnergyBullet.prototype.fire = function () {
-            this.game.physics.arcade.moveToXY(this, this.x, -100, 650);
+            this.game.physics.arcade.moveToXY(this, this.x, -100, 850);
         };
         return EnergyBullet;
     })(Spaders.Projectile);
@@ -162,7 +162,7 @@ var Spaders;
             _super.apply(this, arguments);
         }
         Level1.prototype.create = function () {
-            this.debug = true;
+            this.debug = false;
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -205,25 +205,28 @@ var Spaders;
 
         Level1.prototype.executeLevelScript = function (script) {
             var wave1 = script["waves"][0];
-            this.currentWave = wave1;
-            this.game.time.events.add(Phaser.Timer.SECOND * wave1["time"], this.generateWave, this);
+            this.game.time.events.add(Phaser.Timer.SECOND * wave1["startTime"], this.generateWave, this, wave1);
         };
 
         Level1.prototype.generateWave = function (waveDetails) {
-            var groups = this.currentWave["groups"];
+            var groups = waveDetails["groups"];
+
+            var enemies = new Array();
+
             for (var g in groups) {
                 var t = groups[g]["total"];
                 for (var i = 0; i < t; i++) {
-                    this.enemies.add(this.inactiveEnemies.getAt(i));
+                    //this.enemies.add(this.inactiveEnemies.getAt(i));
+                    var e = this.inactiveEnemies.getAt(i);
+                    this.inactiveEnemies.remove(e);
+                    enemies.push(e);
                 }
-                //this.inactiveEnemies.removeBetween(0, t);
+                var w = new Spaders.Wave(this.game, enemies, this.enemies, groups[g]);
             }
 
             this.enemies.setAll("alive", true);
-
-            this.game.time.events.add(Phaser.Timer.SECOND * 4, (function () {
-                //this.game.physics.arcade.moveToXY(obj, 100, 100, 200);
-            }), this);
+            this.enemies.forEach(function (obj, idx) {
+            }, this);
         };
 
         Level1.prototype.update = function () {
@@ -352,36 +355,6 @@ var Spaders;
         };
 
         Missle.prototype.fire = function () {
-            /*var children = this.game.world.children;
-            var found = false;
-            for (var i = 0; i < children.length; i++) {
-            if (children[i] instanceof Phaser.Group) {
-            if ((<Phaser.Group>children[i]).name === "enemies") {
-            var enemies = (<Phaser.Group>children[i]).children;
-            
-            // Get the closest enemy and SHOOT THEIR FACE OFF
-            var enemy;
-            var maxDistance = 99999;
-            for (var c = 0; c < enemies.length; c++) {
-            if ((<Enemy>enemies[c]).alive) {
-            var d = this.game.physics.arcade.distanceBetween(this, (<Enemy>enemies[c]));
-            if (d <= maxDistance) {
-            maxDistance = d;
-            enemy = enemies[c];
-            }
-            }
-            }
-            
-            if (enemy === null)
-            break;
-            
-            found = true;
-            this.rotation = this.game.physics.arcade.moveToObject(this, enemy, 300); //, 800, 800);
-            this.curTracking = enemy;
-            break;
-            }
-            }
-            }*/
             var p = this.findEnemy();
 
             this.rotation = this.game.physics.arcade.moveToXY(this, p.x, p.y, 500);
@@ -541,5 +514,39 @@ var Spaders;
         return Preloader;
     })(Phaser.State);
     Spaders.Preloader = Preloader;
+})(Spaders || (Spaders = {}));
+var Spaders;
+(function (Spaders) {
+    var Wave = (function () {
+        function Wave(game, stagedEnemies, activeEnemies, waveScript) {
+            this.game = game;
+            this.stagedEnemies = stagedEnemies;
+            this.activeEnemies = activeEnemies;
+            this.waveStartLoc = new Phaser.Point();
+            this.script = waveScript;
+
+            this.initialize();
+        }
+        Wave.prototype.initialize = function () {
+            var points = this.script["points"];
+            this.sendEvery = this.script["sendEvery"];
+            this.waveStartLoc.setTo(points[0], points[1]);
+            points.splice(0, 2);
+            this.waveKeyFrames = points;
+        };
+
+        Wave.prototype.update = function () {
+            if (this.game.time.now > this.nextSend) {
+                this.nextSend = this.game.time.now + this.sendEvery;
+
+                var enemy = this.stagedEnemies.pop();
+
+                enemy.reset(this.waveStartLoc.x, this.waveStartLoc.y);
+                enemy.revive();
+            }
+        };
+        return Wave;
+    })();
+    Spaders.Wave = Wave;
 })(Spaders || (Spaders = {}));
 //# sourceMappingURL=game.js.map

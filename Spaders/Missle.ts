@@ -72,37 +72,6 @@ module Spaders {
         }
 
         fire(): void {
-            /*var children = this.game.world.children;
-            var found = false;
-            for (var i = 0; i < children.length; i++) {
-                if (children[i] instanceof Phaser.Group) {
-                    if ((<Phaser.Group>children[i]).name === "enemies") {
-                        var enemies = (<Phaser.Group>children[i]).children;
-
-                        // Get the closest enemy and SHOOT THEIR FACE OFF
-                        var enemy;
-                        var maxDistance = 99999;
-                        for (var c = 0; c < enemies.length; c++) {
-                            if ((<Enemy>enemies[c]).alive) {
-                                var d = this.game.physics.arcade.distanceBetween(this, (<Enemy>enemies[c]));
-                                if (d <= maxDistance) {
-                                    maxDistance = d;
-                                    enemy = enemies[c];
-                                }
-                            }
-                        }
-
-                        if (enemy === null)
-                            break;
-
-                        found = true;
-                        this.rotation = this.game.physics.arcade.moveToObject(this, enemy, 300); //, 800, 800);
-                        this.curTracking = enemy;
-                        break;
-                    }
-                }
-            }*/
-
             var p = this.findEnemy();
 
             this.rotation = this.game.physics.arcade.moveToXY(this, p.x, p.y, 500);

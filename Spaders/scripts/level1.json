@@ -4,11 +4,12 @@
     "waves": [
         {
             "name": "wave1",
-            "time": 5, 
+            "startTime": 5, 
             "groups": [
                 {
                     "key": "flyer",
                     "total": 6,
+                    "sendEvery": 1000,
                     "points": [
                         -10, -10,
                         200, -10,
@@ -22,10 +23,11 @@
         },
         {
             "name": "wave2",
-            "time": 5,
+            "startTime": 5,
             "groups": [
                 {
                     "key": "flyer",
+                    "sendEvery": 1000,
                     "total": 6,
                     "points": [
                         -10, -10,
