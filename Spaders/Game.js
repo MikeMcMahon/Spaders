@@ -222,7 +222,7 @@ var Spaders;
             this.enemies.setAll("alive", true);
 
             this.game.time.events.add(Phaser.Timer.SECOND * 4, (function () {
-                this.game.physics.arcade.moveToXY(obj, 100, 100, 200);
+                //this.game.physics.arcade.moveToXY(obj, 100, 100, 200);
             }), this);
         };
 
