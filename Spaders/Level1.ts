@@ -4,6 +4,7 @@
         debug: boolean;
         inactiveEnemies: Phaser.Group;
         enemies: Phaser.Group;
+        levelWaves: Array<Wave>;
 
         create() {
             this.debug = false;
@@ -25,6 +26,7 @@
             // Prevents us from instantiating too much during runtime
             var script = <JSON>this.cache.getJSON('level1');
             var waves = script["waves"] || null;
+            this.levelWaves = new Array<Wave>();
             if (waves !== null) {
                 for (var w in waves) {
                     var groups = waves[w]["groups"];
@@ -44,7 +46,6 @@
                                 );
                         }
                     }
-
                 }
             }
 
@@ -77,18 +78,17 @@
                     enemies.push(e);
                 }
                 var w = new Wave(this.game, enemies, this.enemies, groups[g]);
+                this.levelWaves.push(w);
             }
-
-            this.enemies.setAll("alive", true);
-            this.enemies.forEach(function (obj, idx) {
-
-            }, this);
         }
 
         update() {
-           
-           this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
-           this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
+            this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
+            this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
+
+            for (var w in this.levelWaves) {
+                this.levelWaves[w].update();
+            }
         }
 
         

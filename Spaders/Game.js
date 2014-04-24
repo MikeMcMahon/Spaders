@@ -181,6 +181,7 @@ var Spaders;
             // Prevents us from instantiating too much during runtime
             var script = this.cache.getJSON('level1');
             var waves = script["waves"] || null;
+            this.levelWaves = new Array();
             if (waves !== null) {
                 for (var w in waves) {
                     var groups = waves[w]["groups"];
@@ -222,16 +223,17 @@ var Spaders;
                     enemies.push(e);
                 }
                 var w = new Spaders.Wave(this.game, enemies, this.enemies, groups[g]);
+                this.levelWaves.push(w);
             }
-
-            this.enemies.setAll("alive", true);
-            this.enemies.forEach(function (obj, idx) {
-            }, this);
         };
 
         Level1.prototype.update = function () {
             this.game.physics.arcade.overlap(this.enemies, this.player.missles, this.playerShot);
             this.game.physics.arcade.overlap(this.enemies, this.player.bullets, this.playerShot);
+
+            for (var w in this.levelWaves) {
+                this.levelWaves[w].update();
+            }
         };
 
         Level1.prototype.playerShot = function (e, p) {
@@ -524,26 +526,37 @@ var Spaders;
             this.activeEnemies = activeEnemies;
             this.waveStartLoc = new Phaser.Point();
             this.script = waveScript;
-
             this.initialize();
         }
         Wave.prototype.initialize = function () {
             var points = this.script["points"];
             this.sendEvery = this.script["sendEvery"];
             this.waveStartLoc.setTo(points[0], points[1]);
+            this.keyFrames = new Array();
+            this.nextSend = this.game.time.now;
+            this.activeInternal = new Array();
             points.splice(0, 2);
-            this.waveKeyFrames = points;
+
+            for (var i = 0; i < points.length; i += 2) {
+                this.keyFrames.push(new Phaser.Point(points[i], points[i + 1]));
+            }
         };
 
         Wave.prototype.update = function () {
-            if (this.game.time.now > this.nextSend) {
+            if (this.game.time.now > this.nextSend && this.stagedEnemies.length > 0) {
                 this.nextSend = this.game.time.now + this.sendEvery;
 
                 var enemy = this.stagedEnemies.pop();
-
-                enemy.reset(this.waveStartLoc.x, this.waveStartLoc.y);
-                enemy.revive();
+                this.activate(enemy);
             }
+        };
+
+        Wave.prototype.activate = function (e) {
+            e.reset(this.waveStartLoc.x, this.waveStartLoc.y);
+            e.revive();
+            this.activeInternal.push(e);
+            this.activeEnemies.add(e);
+            //this.game.physics.arcade.moveToXY(e, this.keyFrames[0].x, this.keyFrames[0].y, 500);
         };
         return Wave;
     })();

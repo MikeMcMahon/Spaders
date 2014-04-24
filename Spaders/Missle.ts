@@ -47,12 +47,12 @@ module Spaders {
                     var enemies = (<Phaser.Group>children[i]).children;
                     var maxDistance = 99999;
 
-                    for (var i in enemies) {
-                        if (enemies[i]["alive"]) {
-                            var d = this.game.physics.arcade.distanceBetween(this, enemies[i]);
+                    for (var e in enemies) {
+                        if (enemies[e]["alive"]) {
+                            var d = this.game.physics.arcade.distanceBetween(this, enemies[e]);
                             if (d <= maxDistance) {
                                 maxDistance = d;
-                                found = enemies[i];
+                                found = enemies[e];
                             }
                         }
                     }
