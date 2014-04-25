@@ -51,7 +51,7 @@
             e.revive();
             this.activeInternal.push(e);
             this.activeEnemies.add(e);
-            this.game.physics.arcade.moveToXY(e, this.keyFrames[0].x, this.keyFrames[0].y, 500);
+            e.keyFrames = this.keyFrames.slice(0);
         }
     }
 } 

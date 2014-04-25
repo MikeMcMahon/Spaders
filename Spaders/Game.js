@@ -58,6 +58,9 @@ var Spaders;
             this.angle = 90;
             this.events.onRevived.add(this.restore, this);
 
+            this.keyFrames = null;
+            this.isTweening = false;
+
             if (inactive) {
                 // inactive.add(this);
             }
@@ -77,7 +80,25 @@ var Spaders;
             this.health = this.maxHealth;
         };
 
+        // TODO - if this badboy is way off screen and won't be coming back (keyframes)
+        // KILL IT :)
         Enemy.prototype.update = function () {
+            if (this.keyFrames != null) {
+                var keyFrame = this.keyFrames.slice(0, 1)[0];
+                if (!this.isTweening) {
+                    this.isTweening = true;
+                    this.game.add.tween(this).to({ x: keyFrame.x, y: keyFrame.y }, 400, Phaser.Easing.Linear.None, true, 0, 0);
+                }
+
+                if (+Math.round(this.x).toFixed(0) == keyFrame.x && +Math.round(this.y).toFixed(0) == keyFrame.y) {
+                    if (this.keyFrames.length > 1) {
+                        this.keyFrames.splice(0, 1);
+                        this.isTweening = false;
+                    } else {
+                        this.keyFrames = null;
+                    }
+                }
+            }
         };
         return Enemy;
     })(Phaser.Sprite);
@@ -548,7 +569,7 @@ var Spaders;
             e.revive();
             this.activeInternal.push(e);
             this.activeEnemies.add(e);
-            this.game.physics.arcade.moveToXY(e, this.keyFrames[0].x, this.keyFrames[0].y, 500);
+            e.keyFrames = this.keyFrames.slice(0);
         };
         return Wave;
     })();
