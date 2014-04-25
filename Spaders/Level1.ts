@@ -50,7 +50,7 @@
             }
 
             this.enemies.enableBodyDebug = true;
-            this.player = new Spaders.Player(this.game, 60, 60);
+            this.player = new Spaders.Player(this.game, 60, 60, this.enemies);
             this.player.missles.enableBodyDebug = true;
 
             this.game.add.existing(this.enemies);

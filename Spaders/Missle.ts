@@ -3,11 +3,13 @@ module Spaders {
     export class Missle extends Projectile {
         curTracking: Enemy;
         curPlayer: Player;
+        enemies: Phaser.Group; 
 
-        constructor(game: Phaser.Game, player: Player) {
+        constructor(game: Phaser.Game, player: Player, enemies: Phaser.Group) {
             super(0, game, 'missle_1', 0, 0);
             this.alive = false;
             this.exists = false;
+            this.enemies = enemies;
 
             this.game.physics.enable(this, Phaser.Physics.ARCADE);
             this.curTracking = null;
@@ -42,22 +44,17 @@ module Spaders {
             var children = this.game.world.children;
             var found = null;
 
-            for (var i = 0; i < children.length; i++) {
-                if (children[i] instanceof Phaser.Group && children[i]["name"] === "enemies") {
-                    var enemies = (<Phaser.Group>children[i]).children;
-                    var maxDistance = 99999;
-
-                    for (var e in enemies) {
-                        if (enemies[e]["alive"]) {
-                            var d = this.game.physics.arcade.distanceBetween(this, enemies[e]);
-                            if (d <= maxDistance) {
-                                maxDistance = d;
-                                found = enemies[e];
-                            }
-                        }
-                    }
+            var maxDistance = null;
+            this.enemies.forEachAlive(function (obj: Enemy, idx) {
+                var d = this.game.physics.arcade.distanceBetween(this, obj);
+                if (maxDistance == null) {
+                    maxDistance = d;
                 }
-            }
+
+                if (d <= maxDistance) {
+                    found = obj;
+                }
+            }, this);
 
             if (found === null) {
                 p.x = this.x + (this.width / 2) - 13;
@@ -75,11 +72,6 @@ module Spaders {
             var p = this.findEnemy();
 
             this.rotation = this.game.physics.arcade.moveToXY(this, p.x, p.y, 500);
-
-//            if (!found) {
-//                this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
-//                this.angle = -90;
-//            }
         }
     }
 } 

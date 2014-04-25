@@ -196,7 +196,7 @@ var Spaders;
             }
 
             this.enemies.enableBodyDebug = true;
-            this.player = new Spaders.Player(this.game, 60, 60);
+            this.player = new Spaders.Player(this.game, 60, 60, this.enemies);
             this.player.missles.enableBodyDebug = true;
 
             this.game.add.existing(this.enemies);
@@ -290,10 +290,11 @@ var Spaders;
 (function (Spaders) {
     var Missle = (function (_super) {
         __extends(Missle, _super);
-        function Missle(game, player) {
+        function Missle(game, player, enemies) {
             _super.call(this, 0, game, 'missle_1', 0, 0);
             this.alive = false;
             this.exists = false;
+            this.enemies = enemies;
 
             this.game.physics.enable(this, Phaser.Physics.ARCADE);
             this.curTracking = null;
@@ -327,22 +328,17 @@ var Spaders;
             var children = this.game.world.children;
             var found = null;
 
-            for (var i = 0; i < children.length; i++) {
-                if (children[i] instanceof Phaser.Group && children[i]["name"] === "enemies") {
-                    var enemies = children[i].children;
-                    var maxDistance = 99999;
-
-                    for (var i in enemies) {
-                        if (enemies[i]["alive"]) {
-                            var d = this.game.physics.arcade.distanceBetween(this, enemies[i]);
-                            if (d <= maxDistance) {
-                                maxDistance = d;
-                                found = enemies[i];
-                            }
-                        }
-                    }
+            var maxDistance = null;
+            this.enemies.forEachAlive(function (obj, idx) {
+                var d = this.game.physics.arcade.distanceBetween(this, obj);
+                if (maxDistance == null) {
+                    maxDistance = d;
                 }
-            }
+
+                if (d <= maxDistance) {
+                    found = obj;
+                }
+            }, this);
 
             if (found === null) {
                 p.x = this.x + (this.width / 2) - 13;
@@ -360,10 +356,6 @@ var Spaders;
             var p = this.findEnemy();
 
             this.rotation = this.game.physics.arcade.moveToXY(this, p.x, p.y, 500);
-            //            if (!found) {
-            //                this.game.physics.arcade.moveToXY(this, this.x + (this.width / 2) - 13, 0, 400);
-            //                this.angle = -90;
-            //            }
         };
         return Missle;
     })(Spaders.Projectile);
@@ -373,7 +365,7 @@ var Spaders;
 (function (Spaders) {
     var Player = (function (_super) {
         __extends(Player, _super);
-        function Player(game, x, y) {
+        function Player(game, x, y, enemies) {
             _super.call(this, game, x, y, 'ship', 0);
             this.fireRate = 90;
             this.nextFire = 0;
@@ -399,7 +391,7 @@ var Spaders;
             this.missles.physicsBodyType = Phaser.Physics.ARCADE;
             this.missles.enableBody = true;
             for (var i = 0; i < 10; i++) {
-                this.missles.add(new Spaders.Missle(game, this));
+                this.missles.add(new Spaders.Missle(game, this, enemies));
             }
             this.missles.setAll('checkWorldBounds', true);
             this.missles.setAll('outOfBoundsKill', true);
@@ -556,7 +548,7 @@ var Spaders;
             e.revive();
             this.activeInternal.push(e);
             this.activeEnemies.add(e);
-            //this.game.physics.arcade.moveToXY(e, this.keyFrames[0].x, this.keyFrames[0].y, 500);
+            this.game.physics.arcade.moveToXY(e, this.keyFrames[0].x, this.keyFrames[0].y, 500);
         };
         return Wave;
     })();

@@ -14,7 +14,7 @@
         missleRate = 550;
         nextMissle = 0;
 
-        constructor(game: Phaser.Game, x: number, y: number) {
+        constructor(game: Phaser.Game, x: number, y: number, enemies: Phaser.Group) {
             super(game, x, y, 'ship', 0);
 
             game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -36,7 +36,7 @@
             this.missles.physicsBodyType = Phaser.Physics.ARCADE;
             this.missles.enableBody = true;
             for (var i = 0; i < 10; i++) {
-                this.missles.add(new Missle(game, this));
+                this.missles.add(new Missle(game, this, enemies));
             }
             this.missles.setAll('checkWorldBounds', true);
             this.missles.setAll('outOfBoundsKill', true);
