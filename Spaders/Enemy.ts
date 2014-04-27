@@ -49,8 +49,14 @@
                 if (!this.isTweening) {
                     this.isTweening = true;
                     this.game.add.tween(this).to(
-                        { x: keyFrame.x, y: keyFrame.y },
-                        400,  // TODO - determine distance and calculate duration based on distance
+                        { x: keyFrame.x },
+                        500,  // TODO - determine distance and calculate duration based on distance
+                        Phaser.Easing.Linear, true, 0, 0);
+                    this.game.add.tween(this).to(
+                        {
+                            y: keyFrame.y
+                        },
+                        1000,
                         Phaser.Easing.Linear.None, true, 0, 0);
                 }
 

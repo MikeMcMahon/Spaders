@@ -87,7 +87,10 @@ var Spaders;
                 var keyFrame = this.keyFrames.slice(0, 1)[0];
                 if (!this.isTweening) {
                     this.isTweening = true;
-                    this.game.add.tween(this).to({ x: keyFrame.x, y: keyFrame.y }, 400, Phaser.Easing.Linear.None, true, 0, 0);
+                    this.game.add.tween(this).to({ x: keyFrame.x }, 500, Phaser.Easing.Linear, true, 0, 0);
+                    this.game.add.tween(this).to({
+                        y: keyFrame.y
+                    }, 1000, Phaser.Easing.Linear.None, true, 0, 0);
                 }
 
                 if (+Math.round(this.x).toFixed(0) == keyFrame.x && +Math.round(this.y).toFixed(0) == keyFrame.y) {
