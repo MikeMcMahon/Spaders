@@ -60,8 +60,14 @@
 
         currentWave: JSON;
         executeLevelScript(script: JSON) {
+            var startTime = 0;
             var wave1 = script["waves"][0];
-            this.game.time.events.add(Phaser.Timer.SECOND * wave1["startTime"], this.generateWave, this, wave1);
+            for (var w in script["waves"]) {
+                startTime += script["waves"][w]["startTime"];
+                alert("starting wave in " + startTime + " seconds!");
+                this.game.time.events.add(Phaser.Timer.SECOND * startTime, this.generateWave, this, script["waves"][w]);
+            } 
+//            this.game.time.events.add(Phaser.Timer.SECOND * wave1["startTime"], this.generateWave, this, wave1);
         }
 
         generateWave(waveDetails: JSON): void {
@@ -73,7 +79,7 @@
                 var t = groups[g]["total"];
                 for (var i = 0; i < t; i++) {
                     //this.enemies.add(this.inactiveEnemies.getAt(i));
-                    var e = this.inactiveEnemies.getAt(i);
+                    var e = this.inactiveEnemies.getAt(0);
                     this.inactiveEnemies.remove(e);
                     enemies.push(e);
                 }

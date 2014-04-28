@@ -87,10 +87,10 @@ var Spaders;
                 var keyFrame = this.keyFrames.slice(0, 1)[0];
                 if (!this.isTweening) {
                     this.isTweening = true;
-                    this.game.add.tween(this).to({ x: keyFrame.x }, 500, Phaser.Easing.Linear, true, 0, 0);
                     this.game.add.tween(this).to({
+                        x: keyFrame.x,
                         y: keyFrame.y
-                    }, 1000, Phaser.Easing.Linear.None, true, 0, 0);
+                    }, 500, Phaser.Easing.Linear.None, true, 0, 0);
                 }
 
                 if (+Math.round(this.x).toFixed(0) == keyFrame.x && +Math.round(this.y).toFixed(0) == keyFrame.y) {
@@ -229,8 +229,14 @@ var Spaders;
         };
 
         Level1.prototype.executeLevelScript = function (script) {
+            var startTime = 0;
             var wave1 = script["waves"][0];
-            this.game.time.events.add(Phaser.Timer.SECOND * wave1["startTime"], this.generateWave, this, wave1);
+            for (var w in script["waves"]) {
+                startTime += script["waves"][w]["startTime"];
+                alert("starting wave in " + startTime + " seconds!");
+                this.game.time.events.add(Phaser.Timer.SECOND * startTime, this.generateWave, this, script["waves"][w]);
+            }
+            //            this.game.time.events.add(Phaser.Timer.SECOND * wave1["startTime"], this.generateWave, this, wave1);
         };
 
         Level1.prototype.generateWave = function (waveDetails) {
@@ -242,7 +248,7 @@ var Spaders;
                 var t = groups[g]["total"];
                 for (var i = 0; i < t; i++) {
                     //this.enemies.add(this.inactiveEnemies.getAt(i));
-                    var e = this.inactiveEnemies.getAt(i);
+                    var e = this.inactiveEnemies.getAt(0);
                     this.inactiveEnemies.remove(e);
                     enemies.push(e);
                 }
