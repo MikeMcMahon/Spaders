@@ -411,7 +411,7 @@ var Spaders;
             this.bullets = game.add.group(this, 'gun');
             this.bullets.enableBody = true;
             this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-            for (var i = 0; i < 50; i++) {
+            for (var i = 0; i < 4; i++) {
                 this.bullets.add(new Spaders.EnergyBullet(game));
             }
             this.bullets.setAll('checkWorldBounds', true);
@@ -584,4 +584,4 @@ var Spaders;
     })();
     Spaders.Wave = Wave;
 })(Spaders || (Spaders = {}));
-//# sourceMappingURL=game.js.map
+//# sourceMappingURL=Game.js.map

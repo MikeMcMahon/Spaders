@@ -26,7 +26,7 @@
             this.bullets = game.add.group(this, 'gun');
             this.bullets.enableBody = true;
             this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-            for (var i = 0; i < 50; i++) {
+            for (var i = 0; i < 4; i++) {
                 this.bullets.add(new EnergyBullet(game));
             }
             this.bullets.setAll('checkWorldBounds', true);
